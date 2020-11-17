@@ -17,7 +17,7 @@ namespace YukiChang
 			var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
 			Client = new DiscordSocketClient(_config);
 
-			await Client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("YukiChang"));
+			await Client.LoginAsync(TokenType.Bot, Token);
 			await Client.StartAsync();
 
 			Client.Ready += () =>
