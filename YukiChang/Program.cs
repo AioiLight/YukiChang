@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -25,6 +27,14 @@ namespace YukiChang
 			};
 			
 			await Task.Delay(-1);
+		}
+
+		private static string Token
+		{
+			get
+			{
+				return File.ReadAllText("token.txt", Encoding.UTF8);
+			}
 		}
 	}
 }
