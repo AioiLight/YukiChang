@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -41,7 +42,16 @@ namespace YukiChang
 			var text = arg.Content.Trim();
 			if (text.StartsWith("!yuki"))
             {
-				arg.Channel.SendMessageAsync("pong!");
+				var line = text.Substring("!yuki".Length);
+
+				if (line.Length <= "!yuki".Length)
+                {
+					arg.Channel.SendMessageAsync("パラメータが不正です。");
+					return Task.CompletedTask;
+                }
+
+				var cmd = line.Split(" ").First();
+				var param = line.Split(" ").Skip(1).ToArray();
             }
 
 			return Task.CompletedTask;
