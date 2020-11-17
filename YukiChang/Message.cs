@@ -14,5 +14,6 @@ namespace YukiChang
         /// </summary>
         public ulong ID { get; set; }
 
-        public List<Log> Logs { get; set; }    }
+        public List<Log> Logs { get; set; }
+    }
 }
