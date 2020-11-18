@@ -57,7 +57,7 @@ namespace YukiChang
 				var param = line.Split(" ").Skip(1).ToArray();
 				var server = (arg.Channel as SocketGuildChannel).Guild;
 
-				if (cmd == "init")
+				if (cmd == "init" && IsAdmin(arg))
                 {
 					if (param.Length >= 2)
                     {
@@ -86,7 +86,7 @@ namespace YukiChang
                     }
 					else
                     {
-						Error(arg, "パラメーターが不足しています。。");
+						Error(arg, "パラメーターが不足しています。");
 					}
                 }
 				else if (cmd == "save")
@@ -103,6 +103,15 @@ namespace YukiChang
 					Error(arg, "サーバーで1度も初期設定を行っていません。");
 					return;
                 }
+
+				var srv = Settings.Servers.First(s => s.ID == server.Id);
+
+				// 役職で操作を制限する
+				if (!CanHandle(arg, srv))
+                {
+					Error(arg, "bot を操作する権限がありません。");
+					return;
+				}
 			}
 
 			return;
@@ -112,6 +121,16 @@ namespace YukiChang
         {
 			await arg.Channel.SendMessageAsync(error + "``!yuki help``でヘルプを表示");
         }
+
+		private static bool IsAdmin(SocketMessage message)
+		{
+			return (message.Author as SocketGuildUser).GuildPermissions.Administrator;
+		}
+
+		private static bool CanHandle(SocketMessage message, Server server)
+        {
+			return IsAdmin(message) || (message.Author as SocketGuildUser).Roles.Any(r => r.Id == server.AdminRole);
+		}
 
         private static string Token
 		{
