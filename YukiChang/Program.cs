@@ -124,6 +124,8 @@ namespace YukiChang
 						await m.AddReactionAsync(new Emoji("1️⃣"));
 						await m.AddReactionAsync(new Emoji("2️⃣"));
 						await m.AddReactionAsync(new Emoji("3️⃣"));
+
+						srv.Messages.Add(new Message() { ID = m.Id, Title = param[0] });
 					}
                 }
 			}
