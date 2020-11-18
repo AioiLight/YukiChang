@@ -20,7 +20,7 @@ namespace YukiChang
                 ? JsonConvert.DeserializeObject<Settings>(File.ReadAllText("settings.json", Encoding.UTF8))
                 : new Settings();
 
-            var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
+            var _config = new DiscordSocketConfig { MessageCacheSize = 100, AlwaysDownloadUsers = true };
 			Client = new DiscordSocketClient(_config);
 
 			await Client.LoginAsync(TokenType.Bot, Token);
@@ -127,10 +127,67 @@ namespace YukiChang
 
 						srv.Messages.Add(new Message() { ID = m.Id, Title = param[0] });
 					}
+					else
+                    {
+						Error(arg, "パラメーターが不足しています。");
+					}
+                }
+				else if (cmd == "calc")
+                {
+					// 集計
+					if (param.Length >= 1)
+                    {
+						try
+                        {
+							if (!srv.Messages.Any(m => m.ID == ulong.Parse(param[0])))
+                            {
+								Error(arg, "そのメッセージは集計対象ではありません。");
+							}
+
+							var m = await arg.Channel.GetMessageAsync(ulong.Parse(param[0]));
+
+							// 集計
+							var counts = new int[] { 0, 0, 0 };
+							var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+							var role = server.GetRole(srv.UserRole);
+                            for (int i = 0; i < 3; i++)
+                            {
+								var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
+
+								foreach (var item in reactions)
+								{
+									if (role.Members.Any(e => e.Id == item.Id))
+									{
+										counts[i]++;
+									}
+								}
+                            }
+
+							await arg.Channel.SendMessageAsync($"{srv.Messages.First(m => m.ID == ulong.Parse(param[0])).Title} の凸集計\n" +
+								$"集計日時: {DateTime.Now}\n" +
+								$"合計凸数: {CalcPercent(counts.Sum(), role.Members.Count() * 3)}\n" +
+								$"残凸数: {CalcPercent((role.Members.Count() * 3) - counts.Sum(), role.Members.Count() * 3)}\n" +
+								$"完凸済者: {CalcPercent(counts[2], role.Members.Count())}\n" +
+								$"未完凸済者: {CalcPercent(role.Members.Count() - counts[2], role.Members.Count())}");
+						}
+						catch (Exception)
+                        {
+							Error(arg, "パラメータの値が不正です。");
+						}
+                    }
+					else
+                    {
+						Error(arg, "パラメーターが不足しています。");
+					}
                 }
 			}
 
 			return;
+        }
+
+		private static string CalcPercent(int a, int b)
+        {
+			return $"{a}/{b} ({1.0 * a / b:##.##%})";
         }
 
 		private static async void Error(SocketMessage arg, string error)
