@@ -112,6 +112,20 @@ namespace YukiChang
 					Error(arg, "bot を操作する権限がありません。");
 					return;
 				}
+
+				if (cmd == "begin")
+                {
+					// 集計の開始。
+					if (param.Length >= 1)
+                    {
+						var m = await arg.Channel.SendMessageAsync($"凸集計: {param[0]}\n" +
+							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n");
+
+						await m.AddReactionAsync(new Emoji("1️⃣"));
+						await m.AddReactionAsync(new Emoji("2️⃣"));
+						await m.AddReactionAsync(new Emoji("3️⃣"));
+					}
+                }
 			}
 
 			return;
