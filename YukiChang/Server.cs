@@ -6,6 +6,12 @@ namespace YukiChang
 {
     public class Server
     {
+        public Server()
+        {
+            LogChannel = null;
+            Messages = new List<Message>();
+        }
+
         /// <summary>
         /// サーバーのGuild ID。
         /// </summary>
@@ -24,7 +30,7 @@ namespace YukiChang
         /// <summary>
         /// ログを流すチャンネル。
         /// </summary>
-        public ulong LogChannel { get; set; }
+        public ulong? LogChannel { get; set; }
 
         /// <summary>
         /// 集計メッセージ。

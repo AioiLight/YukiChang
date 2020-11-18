@@ -37,24 +37,80 @@ namespace YukiChang
 			await Task.Delay(-1);
 		}
 
-        private Task Client_MessageReceived(SocketMessage arg)
+        private async Task Client_MessageReceived(SocketMessage arg)
         {
 			var text = arg.Content.Trim();
 			if (text.StartsWith("!yuki"))
             {
-				var line = text.Substring("!yuki".Length);
+				var line = text.Substring("!yuki ".Length);
 
-				if (line.Length <= "!yuki".Length)
+				// コマンドチェック
+				if (line.Length <= 0)
                 {
-					arg.Channel.SendMessageAsync("パラメータが不正です。");
-					return Task.CompletedTask;
+					// なし
+					Error(arg, "コマンドが指定されていません。");
+					return;
                 }
 
+				// パラメーターで分割
 				var cmd = line.Split(" ").First();
 				var param = line.Split(" ").Skip(1).ToArray();
-            }
+				var server = (arg.Channel as SocketGuildChannel).Guild;
 
-			return Task.CompletedTask;
+				if (cmd == "init")
+                {
+					if (param.Length >= 2)
+                    {
+                        try
+                        {
+							// 既に初期化済みの場合、登録済みの情報を消去
+							Settings.Servers.RemoveAll((s) => s.ID == server.Id);
+
+							// 追加
+							var s = new Server()
+							{
+								ID = server.Id,
+								AdminRole = ulong.Parse(param[0]),
+								UserRole = ulong.Parse(param[1])
+							};
+							Settings.Servers.Add(s);
+
+							await arg.Channel.SendMessageAsync($"サーバー {server.Name} の初期設定が完了しました。\n" +
+								$"管理者役職: {server.GetRole(ulong.Parse(param[0])).Name}\n" +
+								$"集計対象役職: {server.GetRole(ulong.Parse(param[1])).Name}");
+                        }
+                        catch (Exception)
+                        {
+							Error(arg, "パラメータの値が不正です。");
+						}
+                    }
+					else
+                    {
+						Error(arg, "パラメーターが不足しています。。");
+					}
+                }
+				else if (cmd == "save")
+                {
+					var json = JsonConvert.SerializeObject(Settings);
+					File.WriteAllText("settings.json", json, Encoding.UTF8);
+					await arg.Channel.SendMessageAsync($"設定を保存しました。");
+					return;
+				}
+
+				// 以下、初期化済みの場合のみ実行可能なコマンド。
+				if (!Settings.Servers.Any(s => s.ID == server.Id))
+                {
+					Error(arg, "サーバーで1度も初期設定を行っていません。");
+					return;
+                }
+			}
+
+			return;
+        }
+
+		private static async void Error(SocketMessage arg, string error)
+        {
+			await arg.Channel.SendMessageAsync(error + "``!yuki help``でヘルプを表示");
         }
 
         private static string Token

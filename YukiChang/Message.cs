@@ -4,6 +4,11 @@ namespace YukiChang
 {
     public class Message
     {
+        public Message()
+        {
+            Logs = new List<Log>();
+        }
+
         /// <summary>
         /// タイトル。
         /// </summary>
