@@ -89,13 +89,6 @@ namespace YukiChang
 						Error(arg, "パラメーターが不足しています。");
 					}
                 }
-				else if (cmd == "save")
-                {
-					var json = JsonConvert.SerializeObject(Settings);
-					File.WriteAllText("settings.json", json, Encoding.UTF8);
-					await arg.Channel.SendMessageAsync($"設定を保存しました。");
-					return;
-				}
 
 				// 以下、初期化済みの場合のみ実行可能なコマンド。
 				if (!Settings.Servers.Any(s => s.ID == server.Id))
@@ -180,6 +173,9 @@ namespace YukiChang
 						Error(arg, "パラメーターが不足しています。");
 					}
                 }
+
+				// 保存
+				await Save();
 			}
 
 			return;
@@ -203,6 +199,12 @@ namespace YukiChang
 		private static bool CanHandle(SocketMessage message, Server server)
         {
 			return IsAdmin(message) || (message.Author as SocketGuildUser).Roles.Any(r => r.Id == server.AdminRole);
+		}
+
+		private static async Task Save()
+        {
+			var json = JsonConvert.SerializeObject(Settings);
+			await File.WriteAllTextAsync("settings.json", json, Encoding.UTF8);
 		}
 
         private static string Token
