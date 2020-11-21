@@ -45,10 +45,10 @@ namespace YukiChang
 			if (Settings.Servers.Any(s => s.ID == server.Id))
 			{
 				var target = Settings.Servers.First(s => s.ID == server.Id);
-				if (target.LogChannel.HasValue && target.Messages.Any(m => m.ID == arg3.MessageId))
+				if (target.LogChannel.HasValue && target.Messages.Any(m => m.MessageID == arg3.MessageId))
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
-					var message = target.Messages.First(m => m.ID == arg3.MessageId);
+					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
 						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
 				}
@@ -62,10 +62,10 @@ namespace YukiChang
 			if (Settings.Servers.Any(s => s.ID == server.Id))
             {
 				var target = Settings.Servers.First(s => s.ID == server.Id);
-				if (target.LogChannel.HasValue && target.Messages.Any(m => m.ID == arg3.MessageId))
+				if (target.LogChannel.HasValue && target.Messages.Any(m => m.MessageID == arg3.MessageId))
                 {
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
-					var message = target.Messages.First(m => m.ID == arg3.MessageId);
+					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
 						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
 				}
@@ -147,14 +147,22 @@ namespace YukiChang
 					// 集計の開始。
 					if (param.Length >= 1)
                     {
-						var m = await arg.Channel.SendMessageAsync($"凸集計: {param[0]}\n" +
+						var title = string.Join(" ", param);
+						if (srv.Messages.Any(m => m.Title == title))
+                        {
+							// 重複チェック
+							Error(arg, "タイトルが重複しています。別のタイトルを指定してください。");
+							return;
+                        }
+
+						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
 							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n");
 
 						await m.AddReactionAsync(new Emoji("1️⃣"));
 						await m.AddReactionAsync(new Emoji("2️⃣"));
 						await m.AddReactionAsync(new Emoji("3️⃣"));
 
-						srv.Messages.Add(new Message() { ID = m.Id, Title = param[0] });
+						srv.Messages.Add(new Message() { MessageID = m.Id, ChannelID = m.Channel.Id, Title = title });
 					}
 					else
                     {
@@ -166,38 +174,27 @@ namespace YukiChang
 					// 集計
 					if (param.Length >= 1)
                     {
+						var title = string.Join(" ", param);
 						try
                         {
-							if (!srv.Messages.Any(m => m.ID == ulong.Parse(param[0])))
+							if (!srv.Messages.Any(m => m.Title == title))
                             {
 								Error(arg, "そのメッセージは集計対象ではありません。");
 							}
 
-							var m = await arg.Channel.GetMessageAsync(ulong.Parse(param[0]));
+							var f = srv.Messages.First(m => m.Title == title);
+							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+							var role = server.GetRole(srv.UserRole);
 
 							// 集計
-							var counts = new int[] { 0, 0, 0 };
-							var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
-							var role = server.GetRole(srv.UserRole);
-                            for (var i = 0; i < 3; i++)
-                            {
-								var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
+							var result = await CalcAttack(m, server.GetRole(srv.UserRole));
 
-								foreach (var item in reactions)
-								{
-									if (role.Members.Any(e => e.Id == item.Id))
-									{
-										counts[i]++;
-									}
-								}
-                            }
-
-							await arg.Channel.SendMessageAsync($"{srv.Messages.First(m => m.ID == ulong.Parse(param[0])).Title} の凸集計\n" +
+							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計\n" +
 								$"集計日時: {DateTime.Now}\n" +
-								$"合計凸数: {CalcPercent(counts.Sum(), role.Members.Count() * 3)}\n" +
-								$"残凸数: {CalcPercent((role.Members.Count() * 3) - counts.Sum(), role.Members.Count() * 3)}\n" +
-								$"完凸済者: {CalcPercent(counts[2], role.Members.Count())}\n" +
-								$"未完凸済者: {CalcPercent(role.Members.Count() - counts[2], role.Members.Count())}");
+								$"合計凸数: {CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
+								$"残凸数: {CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
+								$"完凸済者: {CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
+								$"未完凸済者: {CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}");
 						}
 						catch (Exception)
                         {
@@ -251,6 +248,25 @@ namespace YukiChang
         {
 			return $"{a}/{b} ({1.0 * a / b:##.##%})";
         }
+
+		private static async Task<AttackResult> CalcAttack(IMessage m, SocketRole targetRole)
+        {
+			var result = new AttackResult();
+			var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+			for (var i = 0; i < reacts.Length; i++)
+			{
+				var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
+
+				foreach (var item in reactions)
+				{
+					if (targetRole.Members.Any(e => e.Id == item.Id))
+					{
+						result.Attack(item.Id);
+					}
+				}
+			}
+			return result;
+		}
 
 		private static async void Error(SocketMessage arg, string error)
         {

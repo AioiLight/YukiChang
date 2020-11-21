@@ -15,9 +15,14 @@ namespace YukiChang
         public string Title { get; set; }
 
         /// <summary>
+        /// チャンネルのUID。
+        /// </summary>
+        public ulong ChannelID { get; set; }
+
+        /// <summary>
         /// メッセージのUID。
         /// </summary>
-        public ulong ID { get; set; }
+        public ulong MessageID { get; set; }
 
         public List<Log> Logs { get; set; }
     }
