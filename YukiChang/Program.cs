@@ -45,7 +45,10 @@ namespace YukiChang
 			if (Settings.Servers.Any(s => s.ID == server.Id))
 			{
 				var target = Settings.Servers.First(s => s.ID == server.Id);
-				if (target.LogChannel.HasValue && target.Messages.Any(m => m.MessageID == arg3.MessageId))
+				var role = server.GetRole(target.UserRole);
+				if (target.LogChannel.HasValue
+					&& target.Messages.Any(m => m.MessageID == arg3.MessageId)
+					&& role.Members.Any(m => m.Id == arg3.UserId))
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
@@ -62,8 +65,11 @@ namespace YukiChang
 			if (Settings.Servers.Any(s => s.ID == server.Id))
             {
 				var target = Settings.Servers.First(s => s.ID == server.Id);
-				if (target.LogChannel.HasValue && target.Messages.Any(m => m.MessageID == arg3.MessageId))
-                {
+				var role = server.GetRole(target.UserRole);
+				if (target.LogChannel.HasValue
+					&& target.Messages.Any(m => m.MessageID == arg3.MessageId)
+					&& role.Members.Any(m => m.Id == arg3.UserId))
+				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
