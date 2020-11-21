@@ -233,6 +233,12 @@ namespace YukiChang
 						await arg.Channel.SendMessageAsync($"リアクションログを流すチャンネルを 未設定 にしました。");
 					}
                 }
+				else if (cmd == "dispose")
+                {
+					srv.Messages.Clear();
+					await arg.Channel.SendMessageAsync($"全てのメッセージを管理対象から除外しました。\n" +
+						$"リアクションログの記録を消去しました。");
+				}
 
 				// 保存
 				await Save();
