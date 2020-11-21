@@ -33,8 +33,44 @@ namespace YukiChang
 			};
 
             Client.MessageReceived += Client_MessageReceived;
+            Client.ReactionAdded += Client_ReactionAdded;
+            Client.ReactionRemoved += Client_ReactionRemoved;
 			
 			await Task.Delay(-1);
+		}
+
+        private async Task Client_ReactionRemoved(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        {
+			var server = (arg2 as SocketGuildChannel).Guild;
+			if (Settings.Servers.Any(s => s.ID == server.Id))
+			{
+				var target = Settings.Servers.First(s => s.ID == server.Id);
+				if (target.LogChannel.HasValue && target.Messages.Any(m => m.ID == arg3.MessageId))
+				{
+					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
+					var message = target.Messages.First(m => m.ID == arg3.MessageId);
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが" +
+						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
+				}
+			}
+			return;
+		}
+
+        private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
+        {
+			var server = (arg2 as SocketGuildChannel).Guild;
+			if (Settings.Servers.Any(s => s.ID == server.Id))
+            {
+				var target = Settings.Servers.First(s => s.ID == server.Id);
+				if (target.LogChannel.HasValue && target.Messages.Any(m => m.ID == arg3.MessageId))
+                {
+					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
+					var message = target.Messages.First(m => m.ID == arg3.MessageId);
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが" +
+						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
+				}
+            }
+			return;
 		}
 
         private async Task Client_MessageReceived(SocketMessage arg)
@@ -143,7 +179,7 @@ namespace YukiChang
 							var counts = new int[] { 0, 0, 0 };
 							var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
 							var role = server.GetRole(srv.UserRole);
-                            for (int i = 0; i < 3; i++)
+                            for (var i = 0; i < 3; i++)
                             {
 								var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
 
