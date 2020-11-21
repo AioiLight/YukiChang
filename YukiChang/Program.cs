@@ -209,6 +209,30 @@ namespace YukiChang
 						Error(arg, "パラメーターが不足しています。");
 					}
                 }
+				else if (cmd == "log")
+                {
+					// ログ設定
+					if (param.Length >= 1)
+                    {
+						// 設定
+						try
+                        {
+							var ch = server.GetTextChannel(ulong.Parse(param[0]));
+							srv.LogChannel = ch.Id;
+							await arg.Channel.SendMessageAsync($"リアクションログを流すチャンネルを {ch.Name} にしました。");
+                        }
+						catch (Exception)
+                        {
+							Error(arg, "正しくリアクションを流すチャンネルを設定することができませんでした。");
+						}
+                    }
+					else
+                    {
+						// 解除
+						srv.LogChannel = null;
+						await arg.Channel.SendMessageAsync($"リアクションログを流すチャンネルを 未設定 にしました。");
+					}
+                }
 
 				// 保存
 				await Save();
