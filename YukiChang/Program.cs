@@ -317,7 +317,7 @@ namespace YukiChang
 			var text = "";
             foreach (var item in l)
             {
-				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+				text += $"{socketGuild.GetUser(item.UserID)} さん (残り {item.Remain} 凸)\n";
             }
 			return text;
         }
