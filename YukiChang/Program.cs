@@ -212,6 +212,42 @@ namespace YukiChang
 						Error(arg, "パラメーターが不足しています。");
 					}
                 }
+				else if (cmd == "send")
+                {
+					// 勧告
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+						{
+							if (!srv.Messages.Any(m => m.Title == title))
+							{
+								Error(arg, "そのメッセージは集計対象ではありません。");
+							}
+
+							var f = srv.Messages.First(m => m.Title == title);
+							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+							var role = server.GetRole(srv.UserRole);
+
+							// 集計
+							var result = await CalcAttack(m, server.GetRole(srv.UserRole));
+
+							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
+								$"集計日時: {DateTime.Now}\n" +
+								$"残凸のあるユーザー:\n{RemainUser(result, server)}\n" +
+								$"未凸のユーザー:\n{NoAttackUser(result, server)}\n");
+						}
+						catch (Exception)
+						{
+							Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Error(arg, "パラメーターが不足しています。");
+					}
+
+				}
 				else if (cmd == "log")
                 {
 					// ログ設定
@@ -258,6 +294,7 @@ namespace YukiChang
 		private static async Task<AttackResult> CalcAttack(IMessage m, SocketRole targetRole)
         {
 			var result = new AttackResult();
+			targetRole.Members.ToList().ForEach(m => result.Users.Add(new AttackUser(m.Id)));
 			var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
 			for (var i = 0; i < reacts.Length; i++)
 			{
@@ -272,6 +309,28 @@ namespace YukiChang
 				}
 			}
 			return result;
+		}
+
+		private static string RemainUser(AttackResult result, SocketGuild socketGuild)
+        {
+			var l = result.Users.Where(u => !u.IsCompleted && u.Attacked > 0).ToList();
+			var text = "";
+            foreach (var item in l)
+            {
+				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+            }
+			return text;
+        }
+
+		private static string NoAttackUser(AttackResult result, SocketGuild socketGuild)
+		{
+			var l = result.Users.Where(u => u.Attacked == 0).ToList();
+			var text = "";
+			foreach (var item in l)
+			{
+				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+			}
+			return text;
 		}
 
 		private static async void Error(SocketMessage arg, string error)
