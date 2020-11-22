@@ -95,8 +95,8 @@ namespace YukiChang
                 }
 
 				// パラメーターで分割
-				var cmd = line.Split(" ").First();
-				var param = line.Split(" ").Skip(1).ToArray();
+				var cmd = line.Split(' ').First();
+				var param = line.Split(' ').Skip(1).ToArray();
 				var server = (arg.Channel as SocketGuildChannel).Guild;
 
 				if (cmd == "init" && IsAdmin(arg))
@@ -106,7 +106,7 @@ namespace YukiChang
                         try
                         {
 							// 既に初期化済みの場合、登録済みの情報を消去
-							Settings.Servers.RemoveAll((s) => s.ID == server.Id);
+							Settings.Servers.RemoveAll((sr) => sr.ID == server.Id);
 
 							// 追加
 							var s = new Server()
@@ -154,7 +154,7 @@ namespace YukiChang
 					if (param.Length >= 1)
                     {
 						var title = string.Join(" ", param);
-						if (srv.Messages.Any(m => m.Title == title))
+						if (srv.Messages.Any(mt => mt.Title == title))
                         {
 							// 重複チェック
 							Error(arg, "タイトルが重複しています。別のタイトルを指定してください。");
@@ -183,12 +183,12 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
                         {
-							if (!srv.Messages.Any(m => m.Title == title))
+							if (!srv.Messages.Any(mt => mt.Title == title))
                             {
 								Error(arg, "そのメッセージは集計対象ではありません。");
 							}
 
-							var f = srv.Messages.First(m => m.Title == title);
+							var f = srv.Messages.First(mt => mt.Title == title);
 							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
 							var role = server.GetRole(srv.UserRole);
 
@@ -220,12 +220,12 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
 						{
-							if (!srv.Messages.Any(m => m.Title == title))
+							if (!srv.Messages.Any(mt => mt.Title == title))
 							{
 								Error(arg, "そのメッセージは集計対象ではありません。");
 							}
 
-							var f = srv.Messages.First(m => m.Title == title);
+							var f = srv.Messages.First(mt => mt.Title == title);
 							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
 							var role = server.GetRole(srv.UserRole);
 
@@ -294,7 +294,7 @@ namespace YukiChang
 		private static async Task<AttackResult> CalcAttack(IMessage m, SocketRole targetRole)
         {
 			var result = new AttackResult();
-			targetRole.Members.ToList().ForEach(m => result.Users.Add(new AttackUser(m.Id)));
+			targetRole.Members.ToList().ForEach(mr => result.Users.Add(new AttackUser(mr.Id)));
 			var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
 			for (var i = 0; i < reacts.Length; i++)
 			{
@@ -351,7 +351,10 @@ namespace YukiChang
 		private static async Task Save()
         {
 			var json = JsonConvert.SerializeObject(Settings);
-			await File.WriteAllTextAsync("settings.json", json, Encoding.UTF8);
+			using (var s = new StreamWriter("settings.json", false, Encoding.UTF8))
+            {
+				await s.WriteAsync(json);
+            }
 		}
 
         private static string Token

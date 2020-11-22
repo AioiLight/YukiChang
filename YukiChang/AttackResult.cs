@@ -10,7 +10,7 @@ namespace YukiChang
         {
             if (Users.Any(u => u.UserID == uid))
             {
-                var u = Users.First(u => u.UserID == uid);
+                var u = Users.First(uf => uf.UserID == uid);
                 u.Attack();
                 return u;
             }
