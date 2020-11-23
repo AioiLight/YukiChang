@@ -232,8 +232,8 @@ namespace YukiChang
 							// 集計
 							var result = await CalcAttack(m, server.GetRole(srv.UserRole));
 
-							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n\n" +
-								$"集計日時: {DateTime.Now}\n" +
+							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
+								$"集計日時: {DateTime.Now}\n\n" +
 								$"完凸したユーザー:\n{CompleteUser(result, server)}\n" +
 								$"残凸のあるユーザー:\n{RemainUser(result, server)}\n" +
 								$"未凸のユーザー:\n{NoAttackUser(result, server)}\n");
