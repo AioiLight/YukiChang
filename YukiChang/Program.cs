@@ -234,6 +234,7 @@ namespace YukiChang
 
 							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
 								$"集計日時: {DateTime.Now}\n" +
+								$"完凸したユーザー:\n{CompleteUser(result, server)}\n" +
 								$"残凸のあるユーザー:\n{RemainUser(result, server)}\n" +
 								$"未凸のユーザー:\n{NoAttackUser(result, server)}\n");
 						}
@@ -325,6 +326,17 @@ namespace YukiChang
 		private static string NoAttackUser(AttackResult result, SocketGuild socketGuild)
 		{
 			var l = result.Users.Where(u => u.Attacked == 0).ToList();
+			var text = "";
+			foreach (var item in l)
+			{
+				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+			}
+			return text;
+		}
+
+		private static string CompleteUser(AttackResult result, SocketGuild socketGuild)
+		{
+			var l = result.Users.Where(u => u.IsCompleted).ToList();
 			var text = "";
 			foreach (var item in l)
 			{
