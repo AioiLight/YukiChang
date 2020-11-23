@@ -318,7 +318,8 @@ namespace YukiChang
 			var text = "";
             foreach (var item in l)
             {
-				text += $"{socketGuild.GetUser(item.UserID)} さん (残り {item.Remain} 凸)\n";
+				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
+				text += $"{name} さん (残り {item.Remain} 凸)\n";
             }
 			return text;
         }
@@ -329,7 +330,8 @@ namespace YukiChang
 			var text = "";
 			foreach (var item in l)
 			{
-				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
+				text += $"{name} さん\n";
 			}
 			return text;
 		}
@@ -340,7 +342,8 @@ namespace YukiChang
 			var text = "";
 			foreach (var item in l)
 			{
-				text += $"{socketGuild.GetUser(item.UserID)} さん\n";
+				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
+				text += $"{name} さん\n";
 			}
 			return text;
 		}
