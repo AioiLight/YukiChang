@@ -234,9 +234,11 @@ namespace YukiChang
 
 							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
 								$"集計日時: {DateTime.Now}\n\n" +
-								$"完凸したユーザー:\n{CompleteUser(result, server)}\n" +
-								$"残凸のあるユーザー:\n{RemainUser(result, server)}\n" +
-								$"未凸のユーザー:\n{NoAttackUser(result, server)}\n");
+								$"完凸したユーザー:\n{AttackUser(result, server, 3)}\n" +
+								$"残凸のあるユーザー:\n" +
+								$"・残り1凸\n{AttackUser(result, server, 2)}\n" +
+								$"・残り2凸\n{AttackUser(result, server, 1)}\n" +
+								$"・残り3凸\n{AttackUser(result, server, 0)}");
 						}
 						catch (Exception)
 						{
@@ -312,33 +314,9 @@ namespace YukiChang
 			return result;
 		}
 
-		private static string RemainUser(AttackResult result, SocketGuild socketGuild)
-        {
-			var l = result.Users.Where(u => !u.IsCompleted && u.Attacked > 0).ToList();
-			var text = "";
-            foreach (var item in l)
-            {
-				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
-				text += $"{name} さん (残り {item.Remain} 凸)\n";
-            }
-			return text;
-        }
-
-		private static string NoAttackUser(AttackResult result, SocketGuild socketGuild)
+		private static string AttackUser(AttackResult result, SocketGuild socketGuild, int target)
 		{
-			var l = result.Users.Where(u => u.Attacked == 0).ToList();
-			var text = "";
-			foreach (var item in l)
-			{
-				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
-				text += $"{name} さん\n";
-			}
-			return text;
-		}
-
-		private static string CompleteUser(AttackResult result, SocketGuild socketGuild)
-		{
-			var l = result.Users.Where(u => u.IsCompleted).ToList();
+			var l = result.Users.Where(u => u.Attacked == target).ToList();
 			var text = "";
 			foreach (var item in l)
 			{
