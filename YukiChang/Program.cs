@@ -193,14 +193,14 @@ namespace YukiChang
 							var role = server.GetRole(srv.UserRole);
 
 							// 集計
-							var result = await CalcAttack(m, server.GetRole(srv.UserRole));
+							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
 							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計\n" +
 								$"集計日時: {DateTime.Now}\n" +
-								$"合計凸数: {CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
-								$"残凸数: {CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
-								$"完凸済者: {CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
-								$"未完凸済者: {CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}");
+								$"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
+								$"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
+								$"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
+								$"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}");
 						}
 						catch (Exception)
                         {
@@ -230,15 +230,15 @@ namespace YukiChang
 							var role = server.GetRole(srv.UserRole);
 
 							// 集計
-							var result = await CalcAttack(m, server.GetRole(srv.UserRole));
+							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
 							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
 								$"集計日時: {DateTime.Now}\n\n" +
-								$"完凸したユーザー:\n{AttackUser(result, server, 3)}\n" +
+								$"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
 								$"残凸のあるユーザー:\n" +
-								$"・残り1凸\n{AttackUser(result, server, 2)}\n" +
-								$"・残り2凸\n{AttackUser(result, server, 1)}\n" +
-								$"・残り3凸\n{AttackUser(result, server, 0)}");
+								$"・残り1凸\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
+								$"・残り2凸\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
+								$"・残り3凸\n{ClanBattleUtil.AttackUser(result, server, 0)}");
 						}
 						catch (Exception)
 						{
@@ -288,43 +288,6 @@ namespace YukiChang
 
 			return;
         }
-
-		private static string CalcPercent(int a, int b)
-        {
-			return $"{a}/{b} ({1.0 * a / b:##.##%})";
-        }
-
-		private static async Task<AttackResult> CalcAttack(IMessage m, SocketRole targetRole)
-        {
-			var result = new AttackResult();
-			targetRole.Members.ToList().ForEach(mr => result.Users.Add(new AttackUser(mr.Id)));
-			var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
-			for (var i = 0; i < reacts.Length; i++)
-			{
-				var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
-
-				foreach (var item in reactions)
-				{
-					if (targetRole.Members.Any(e => e.Id == item.Id))
-					{
-						result.Attack(item.Id);
-					}
-				}
-			}
-			return result;
-		}
-
-		private static string AttackUser(AttackResult result, SocketGuild socketGuild, int target)
-		{
-			var l = result.Users.Where(u => u.Attacked == target).ToList();
-			var text = "";
-			foreach (var item in l)
-			{
-				var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
-				text += $"{name} さん\n";
-			}
-			return text;
-		}
 
 		private static async void Error(SocketMessage arg, string error)
         {
