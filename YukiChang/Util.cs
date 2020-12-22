@@ -1,0 +1,28 @@
+﻿using Discord.WebSocket;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace YukiChang
+{
+    internal static class Util
+    {
+        internal static async void Error(SocketMessage arg, string error)
+        {
+            await arg.Channel.SendMessageAsync(error + "``!yuki help``でヘルプを表示");
+        }
+
+        internal static async Task Save(Settings settings)
+        {
+            var json = JsonConvert.SerializeObject(settings);
+            using (var s = new StreamWriter("settings.json", false, Encoding.UTF8))
+            {
+                await s.WriteAsync(json);
+            }
+        }
+    }
+}

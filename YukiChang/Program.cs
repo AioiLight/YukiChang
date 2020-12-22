@@ -90,7 +90,7 @@ namespace YukiChang
 				if (line.Length <= 0)
                 {
 					// なし
-					Error(arg, "コマンドが指定されていません。");
+					Util.Error(arg, "コマンドが指定されていません。");
 					return;
                 }
 
@@ -123,19 +123,19 @@ namespace YukiChang
                         }
                         catch (Exception)
                         {
-							Error(arg, "パラメータの値が不正です。");
+							Util.Error(arg, "パラメータの値が不正です。");
 						}
                     }
 					else
                     {
-						Error(arg, "パラメーターが不足しています。");
+						Util.Error(arg, "パラメーターが不足しています。");
 					}
                 }
 
 				// 以下、初期化済みの場合のみ実行可能なコマンド。
 				if (!Settings.Servers.Any(s => s.ID == server.Id))
                 {
-					Error(arg, "サーバーで1度も初期設定を行っていません。");
+					Util.Error(arg, "サーバーで1度も初期設定を行っていません。");
 					return;
                 }
 
@@ -144,7 +144,7 @@ namespace YukiChang
 				// 役職で操作を制限する
 				if (!DiscordUtil.CanHandle(arg, srv))
                 {
-					Error(arg, "bot を操作する権限がありません。");
+					Util.Error(arg, "bot を操作する権限がありません。");
 					return;
 				}
 
@@ -157,7 +157,7 @@ namespace YukiChang
 						if (srv.Messages.Any(mt => mt.Title == title))
                         {
 							// 重複チェック
-							Error(arg, "タイトルが重複しています。別のタイトルを指定してください。");
+							Util.Error(arg, "タイトルが重複しています。別のタイトルを指定してください。");
 							return;
                         }
 
@@ -172,7 +172,7 @@ namespace YukiChang
 					}
 					else
                     {
-						Error(arg, "パラメーターが不足しています。");
+						Util.Error(arg, "パラメーターが不足しています。");
 					}
                 }
 				else if (cmd == "calc")
@@ -185,7 +185,7 @@ namespace YukiChang
                         {
 							if (!srv.Messages.Any(mt => mt.Title == title))
                             {
-								Error(arg, "そのメッセージは集計対象ではありません。");
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
 							}
 
 							var f = srv.Messages.First(mt => mt.Title == title);
@@ -204,12 +204,12 @@ namespace YukiChang
 						}
 						catch (Exception)
                         {
-							Error(arg, "パラメータの値が不正です。");
+							Util.Error(arg, "パラメータの値が不正です。");
 						}
                     }
 					else
                     {
-						Error(arg, "パラメーターが不足しています。");
+						Util.Error(arg, "パラメーターが不足しています。");
 					}
                 }
 				else if (cmd == "send")
@@ -222,7 +222,7 @@ namespace YukiChang
 						{
 							if (!srv.Messages.Any(mt => mt.Title == title))
 							{
-								Error(arg, "そのメッセージは集計対象ではありません。");
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
 							}
 
 							var f = srv.Messages.First(mt => mt.Title == title);
@@ -242,12 +242,12 @@ namespace YukiChang
 						}
 						catch (Exception)
 						{
-							Error(arg, "パラメータの値が不正です。");
+							Util.Error(arg, "パラメータの値が不正です。");
 						}
 					}
 					else
 					{
-						Error(arg, "パラメーターが不足しています。");
+						Util.Error(arg, "パラメーターが不足しています。");
 					}
 
 				}
@@ -265,7 +265,7 @@ namespace YukiChang
                         }
 						catch (Exception)
                         {
-							Error(arg, "正しくリアクションを流すチャンネルを設定することができませんでした。");
+							Util.Error(arg, "正しくリアクションを流すチャンネルを設定することができませんでした。");
 						}
                     }
 					else
@@ -283,25 +283,11 @@ namespace YukiChang
 				}
 
 				// 保存
-				await Save();
+				await Util.Save(Settings);
 			}
 
 			return;
         }
-
-		private static async void Error(SocketMessage arg, string error)
-        {
-			await arg.Channel.SendMessageAsync(error + "``!yuki help``でヘルプを表示");
-        }
-
-		private static async Task Save()
-        {
-			var json = JsonConvert.SerializeObject(Settings);
-			using (var s = new StreamWriter("settings.json", false, Encoding.UTF8))
-            {
-				await s.WriteAsync(json);
-            }
-		}
 
         private static string Token
 		{
