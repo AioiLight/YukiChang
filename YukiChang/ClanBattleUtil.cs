@@ -38,7 +38,7 @@ namespace YukiChang
             var text = "";
             foreach (var item in l)
             {
-                var name = socketGuild.GetUser(item.UserID).Nickname ?? socketGuild.GetUser(item.UserID).Username;
+                var name = DiscordUtil.GetName(item.UserID, socketGuild);
                 text += $"{name} さん\n";
             }
             return text;

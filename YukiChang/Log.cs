@@ -38,8 +38,7 @@ namespace YukiChang
         /// <returns>ニックネームまたは名前</returns>
         internal string GetName(SocketGuild socketGuild)
         {
-            var user = socketGuild.GetUser(User);
-            return user.Nickname ?? user.Username;
+            return DiscordUtil.GetName(User, socketGuild);
         }
 
         /// <summary>

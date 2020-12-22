@@ -25,5 +25,17 @@ namespace YukiChang
         {
             return IsAdmin(message) || (message.Author as SocketGuildUser).Roles.Any(r => r.Id == server.AdminRole);
         }
+
+        /// <summary>
+        /// UIDから名前を取得する。
+        /// </summary>
+        /// <param name="uid">UID。</param>
+        /// <param name="socketGuild">サーバ。</param>
+        /// <returns>ニックネームまたは名前</returns>
+        internal static string GetName(ulong uid, SocketGuild socketGuild)
+        {
+            var user = socketGuild.GetUser(uid);
+            return user.Nickname ?? user.Username;
+        }
     }
 }
