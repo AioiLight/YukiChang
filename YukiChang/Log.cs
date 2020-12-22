@@ -11,25 +11,21 @@ namespace YukiChang
         /// <param name="user">ユーザーUID。</param>
         /// <param name="time">時刻。</param>
         /// <param name="react">リアクションUID。</param>
-        public Log(ulong user, ulong time, uint react)
+        public Log(ulong user, ulong time, string react)
         {
             User = user;
             Time = time;
             React = react;
         }
 
-        public override bool Equals(object obj)
+        /// <summary>
+        /// リアクションが同じであるかチェックする
+        /// </summary>
+        /// <param name="log">ログ</param>
+        /// <returns>リアクションが同じであるか。</returns>
+        public bool SameReact(Log log)
         {
-            if (obj is Log log)
-            {
-                if (log.User == User
-                    && log.Time == Time
-                    && log.React == React)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return log.React == React && log.User == User;
         }
 
         /// <summary>
@@ -50,17 +46,8 @@ namespace YukiChang
             return DateTimeOffset.FromUnixTimeSeconds((long)Time).DateTime;
         }
 
-        public override int GetHashCode()
-        {
-            int hashCode = -1793829422;
-            hashCode = hashCode * -1521134295 + User.GetHashCode();
-            hashCode = hashCode * -1521134295 + Time.GetHashCode();
-            hashCode = hashCode * -1521134295 + React.GetHashCode();
-            return hashCode;
-        }
-
         public ulong User { get; private set; }
         public ulong Time { get; private set; }
-        public uint React { get; private set; }
+        public string React { get; private set; }
     }
 }
