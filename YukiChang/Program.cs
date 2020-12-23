@@ -299,7 +299,7 @@ namespace YukiChang
 
 							// CSV生成
 							var f = srv.Messages.First(mt => mt.Title == title);
-							var csv = ClanBattleUtil.ToCSV(f.Logs, server);
+							var csv = ClanBattleUtil.ToCSV(f.Logs, server, f.Title);
 							var name = $"{server.Id}-{f.ChannelID}-{f.MessageID}.csv";
 							File.WriteAllText(name, csv, Encoding.UTF8);
 							await arg.Channel.SendFileAsync(name, text: $"{f.Title} のログファイル:");

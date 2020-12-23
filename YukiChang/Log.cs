@@ -43,7 +43,7 @@ namespace YukiChang
         /// <returns>時刻。</returns>
         internal DateTime GetDateTime()
         {
-            return DateTimeOffset.FromUnixTimeSeconds((long)Time).DateTime;
+            return DateTimeOffset.FromUnixTimeSeconds((long)Time).LocalDateTime;
         }
 
         public ulong User { get; private set; }

@@ -54,7 +54,7 @@ namespace YukiChang
         internal static string ToCSV(IReadOnlyList<Log> logs, SocketGuild socketGuild, string title)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"\"時刻\",\"プレイヤー\",\"リアクション\"");
+            sb.AppendLine($"\"時刻\",\"タイトル\",\"プレイヤー\",\"リアクション\"");
             foreach (var item in logs)
             {
                 sb.AppendLine($"\"{item.GetDateTime()}\",\"{title}\",\"{item.GetName(socketGuild)}\",\"{item.React}\"");
