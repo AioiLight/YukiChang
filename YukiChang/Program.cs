@@ -259,7 +259,6 @@ namespace YukiChang
 					{
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
-
 				}
 				else if (cmd == "log")
                 {
@@ -285,6 +284,37 @@ namespace YukiChang
 						await arg.Channel.SendMessageAsync($"リアクションログを流すチャンネルを 未設定 にしました。");
 					}
                 }
+				else if (cmd == "csv")
+                {
+					// CSV出力
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+						{
+							if (!srv.Messages.Any(mt => mt.Title == title))
+							{
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+							}
+
+							// CSV生成
+							var f = srv.Messages.First(mt => mt.Title == title);
+							var csv = ClanBattleUtil.ToCSV(f.Logs, server);
+							var name = $"{server.Id}-{f.ChannelID}-{f.MessageID}.csv";
+							File.WriteAllText(name, csv, Encoding.UTF8);
+							await arg.Channel.SendFileAsync(name, text: $"{f.Title} のログファイル:");
+							File.Delete(name);
+						}
+						catch (Exception)
+						{
+							Util.Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Util.Error(arg, "パラメーターが不足しています。");
+					}
+				}
 				else if (cmd == "dispose")
                 {
 					srv.Messages.Clear();

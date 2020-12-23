@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace YukiChang
@@ -42,6 +44,22 @@ namespace YukiChang
                 text += $"{name} さん\n";
             }
             return text;
+        }
+
+        /// <summary>
+        /// CSV出力する。
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns>CSVフォーマットのString。</returns>
+        internal static string ToCSV(IReadOnlyList<Log> logs, SocketGuild socketGuild)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"\"時刻\",\"プレイヤー\",\"リアクション\"");
+            foreach (var item in logs)
+            {
+                sb.AppendLine($"\"{item.GetDateTime()}\",\"{item.GetName(socketGuild)}\",\"{item.React}\"");
+            }
+            return sb.ToString();
         }
     }
 }
