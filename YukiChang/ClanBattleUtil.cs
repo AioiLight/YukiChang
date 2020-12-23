@@ -51,13 +51,13 @@ namespace YukiChang
         /// </summary>
         /// <param name="result"></param>
         /// <returns>CSVフォーマットのString。</returns>
-        internal static string ToCSV(IReadOnlyList<Log> logs, SocketGuild socketGuild)
+        internal static string ToCSV(IReadOnlyList<Log> logs, SocketGuild socketGuild, string title)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"\"時刻\",\"プレイヤー\",\"リアクション\"");
             foreach (var item in logs)
             {
-                sb.AppendLine($"\"{item.GetDateTime()}\",\"{item.GetName(socketGuild)}\",\"{item.React}\"");
+                sb.AppendLine($"\"{item.GetDateTime()}\",\"{title}\",\"{item.GetName(socketGuild)}\",\"{item.React}\"");
             }
             return sb.ToString();
         }
