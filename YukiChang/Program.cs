@@ -54,12 +54,12 @@ namespace YukiChang
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
 						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
-				}
 
-				// ログから削除
-				var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
-				var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
-				mes.Logs.RemoveAll(e => e.SameReact(log));
+					// ログから削除
+					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
+					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
+					mes.Logs.RemoveAll(e => e.SameReact(log));
+				}
 			}
 			return;
 		}
@@ -79,12 +79,12 @@ namespace YukiChang
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
 						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
-				}
 
-				// ログ取り
-				var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
-				var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
-				mes.Logs.Add(log);
+					// ログ取り
+					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
+					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
+					mes.Logs.Add(log);
+				}
 			}
 			return;
 		}
