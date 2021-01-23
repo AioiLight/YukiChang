@@ -317,9 +317,16 @@ namespace YukiChang
 				}
 				else if (cmd == "dispose")
                 {
-					srv.Messages.Clear();
-					await arg.Channel.SendMessageAsync($"全てのメッセージを管理対象から除外しました。\n" +
-						$"リアクションログの記録を消去しました。");
+					if (DiscordUtil.IsAdmin(arg))
+                    {
+						srv.Messages.Clear();
+						await arg.Channel.SendMessageAsync($"全てのメッセージを管理対象から除外しました。\n" +
+							$"リアクションログの記録を消去しました。");
+                    }
+					else
+                    {
+						await arg.Channel.SendMessageAsync($"権限がありません。");
+					}
 				}
 
 				// 保存
