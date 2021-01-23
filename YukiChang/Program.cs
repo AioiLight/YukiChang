@@ -246,9 +246,9 @@ namespace YukiChang
 								$"集計日時: {DateTime.Now}\n\n" +
 								$"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
 								$"残凸のあるユーザー:\n" +
-								$"・残り1凸\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
-								$"・残り2凸\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
-								$"・残り3凸\n{ClanBattleUtil.AttackUser(result, server, 0)}");
+								$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
+								$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
+								$"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}");
 						}
 						catch (Exception)
 						{
