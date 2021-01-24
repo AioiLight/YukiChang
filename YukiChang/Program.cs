@@ -48,7 +48,8 @@ namespace YukiChang
 				var role = server.GetRole(target.UserRole);
 				if (target.LogChannel.HasValue
 					&& target.Messages.Any(m => m.MessageID == arg3.MessageId)
-					&& role.Members.Any(m => m.Id == arg3.UserId))
+					&& role.Members.Any(m => m.Id == arg3.UserId)
+					&& arg3.Emote.Name != new Emoji("☠️").Name) // Bot側からリアクションを消した場合と干渉するので例外的にログを流さない。
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
@@ -84,7 +85,21 @@ namespace YukiChang
 					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
 					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					mes.Logs.Add(log);
+
 				}
+
+				// ラストアタックの処理。
+				var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+				if (reacts.Any(r => r.Name == arg3.Emote.Name))
+                {
+					// 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
+					if (target.Messages.Any(m => m.MessageID == arg3.MessageId) && role.Members.Any(m => m.Id == arg3.UserId))
+                    {
+                        // リアクション削除
+                        await arg3.Message.Value.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);
+                        //await arg3.Message.Value.RemoveAllReactionsAsync();
+                    }
+                }
 			}
 			return;
 		}
@@ -172,11 +187,13 @@ namespace YukiChang
                         }
 
 						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
-							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n");
+							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n" +
+							$"ボスを倒したら、☠️ボタンを押して、持ち越しを消化後数字のボタンを押してください。\n");
 
 						await m.AddReactionAsync(new Emoji("1️⃣"));
 						await m.AddReactionAsync(new Emoji("2️⃣"));
 						await m.AddReactionAsync(new Emoji("3️⃣"));
+						await m.AddReactionAsync(new Emoji("☠️"));
 
 						srv.Messages.Add(new Message() { MessageID = m.Id, ChannelID = m.Channel.Id, Title = title });
 					}
