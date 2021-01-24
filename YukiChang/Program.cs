@@ -92,9 +92,9 @@ namespace YukiChang
         private async Task Client_MessageReceived(SocketMessage arg)
         {
 			var text = arg.Content.Trim();
-			if (text.StartsWith("!yuki"))
+			if (text.StartsWith(Prefix))
             {
-				var line = text.Substring("!yuki ".Length);
+				var line = text.Substring(Prefix.Length + 1);
 
 				// コマンドチェック
 				if (line.Length <= 0)
@@ -343,6 +343,20 @@ namespace YukiChang
 				return File.ReadAllText("token.txt", Encoding.UTF8);
 			}
 		}
+
+		private static string Prefix
+        {
+			get
+            {
+				var y = "!yuki";
+#if BETA
+				return y + "b";
+#endif
+#if !BETA
+				return y;
+#endif
+			}
+        }
 
 		private static Settings Settings { get; set; }
 	}
