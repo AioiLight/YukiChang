@@ -10,7 +10,7 @@ namespace YukiChang
     {
         internal static async void Error(SocketMessage arg, string error)
         {
-            await arg.Channel.SendMessageAsync(error + "``!yuki help``でヘルプを表示");
+            await arg.Channel.SendMessageAsync(error);
         }
 
         internal static async Task Save(Settings settings)
