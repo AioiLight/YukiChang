@@ -185,6 +185,11 @@ namespace YukiChang
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
                 }
+				else if (cmd == "list")
+                {
+					await arg.Channel.SendMessageAsync($"{server.Name} の凸管理一覧\n" +
+						$"{string.Join("\n", srv.Messages.Select(m => m.Title).ToArray())}");
+                }
 				else if (cmd == "calc")
                 {
 					// 集計
