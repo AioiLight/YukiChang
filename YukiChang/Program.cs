@@ -94,15 +94,15 @@ namespace YukiChang
 			var text = arg.Content.Trim();
 			if (text.StartsWith(Prefix))
             {
-				var line = text.Substring(Prefix.Length + 1);
+				var line = text.Substring(Prefix.Length).Trim();
 
 				// コマンドチェック
 				if (line.Length <= 0)
-                {
+				{
 					// なし
 					Util.Error(arg, "コマンドが指定されていません。");
 					return;
-                }
+				}
 
 				// パラメーターで分割
 				var cmd = line.Split(' ').First();
@@ -327,6 +327,11 @@ namespace YukiChang
                     {
 						await arg.Channel.SendMessageAsync($"権限がありません。");
 					}
+				}
+				else
+                {
+					// なし
+					Util.Error(arg, "コマンドが存在しません。");
 				}
 
 				// 保存
