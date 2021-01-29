@@ -205,7 +205,7 @@ namespace YukiChang
                             // 集計
                             var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-                            await SendCalcMessage(arg, f, role, result);
+                            await arg.Channel.SendMessageAsync(GetCalcMessage(f, role, result));
                         }
                         catch (Exception)
                         {
@@ -237,9 +237,41 @@ namespace YukiChang
                             // 集計
                             var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-                            await SendSendMessage(arg, server, f, result);
+                            await arg.Channel.SendMessageAsync(GetSendMessage(server, f, result));
                         }
                         catch (Exception)
+						{
+							Util.Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Util.Error(arg, "パラメーターが不足しています。");
+					}
+				}
+				else if (cmd == "all")
+                {
+					// 集計＆勧告
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+						{
+							if (!srv.Messages.Any(mt => mt.Title == title))
+							{
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+							}
+
+							var f = srv.Messages.First(mt => mt.Title == title);
+							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+							var role = server.GetRole(srv.UserRole);
+
+							// 集計
+							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
+
+							await arg.Channel.SendMessageAsync($"{GetCalcMessage(f, role, result)}\n\n{GetSendMessage(server, f, result)}");
+						}
+						catch (Exception)
 						{
 							Util.Error(arg, "パラメータの値が不正です。");
 						}
@@ -325,25 +357,25 @@ namespace YukiChang
 			return;
         }
 
-        private static async Task SendSendMessage(SocketMessage arg, SocketGuild server, Message f, AttackResult result)
+        private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
         {
-            await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
-                                            $"集計日時: {DateTime.Now}\n\n" +
-                                            $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
-                                            $"残凸のあるユーザー:\n" +
-                                            $"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
-                                            $"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
-                                            $"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}");
+            return $"{f.Title} の凸集計について\n" +
+				$"集計日時: {DateTime.Now}\n\n" +
+				$"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
+				$"残凸のあるユーザー:\n" +
+				$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
+				$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
+				$"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}";
         }
 
-        private static async Task SendCalcMessage(SocketMessage arg, Message f, SocketRole role, AttackResult result)
+        private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)
         {
-            await arg.Channel.SendMessageAsync($"{f.Title} の凸集計\n" +
-                                            $"集計日時: {DateTime.Now}\n" +
-                                            $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
-                                            $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
-                                            $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
-                                            $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}");
+            return $"{f.Title} の凸集計\n" +
+                $"集計日時: {DateTime.Now}\n" +
+                $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
+                $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
+                $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
+                $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
         }
 
         private static string Token
