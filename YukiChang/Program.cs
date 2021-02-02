@@ -213,7 +213,7 @@ namespace YukiChang
                             // 集計
                             var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-                            await arg.Channel.SendMessageAsync(GetCalcMessage(f, role, result));
+                            await arg.Channel.SendMessageAsync(GetHeader(f) + GetCalcMessage(f, role, result));
                         }
                         catch (Exception)
                         {
@@ -245,7 +245,7 @@ namespace YukiChang
                             // 集計
                             var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-                            await arg.Channel.SendMessageAsync(GetSendMessage(server, f, result));
+                            await arg.Channel.SendMessageAsync(GetHeader(f) + GetSendMessage(server, f, result));
                         }
                         catch (Exception)
 						{
@@ -277,7 +277,7 @@ namespace YukiChang
 							// 集計
 							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-							await arg.Channel.SendMessageAsync($"{GetCalcMessage(f, role, result)}\n\n{GetSendMessage(server, f, result)}");
+							await arg.Channel.SendMessageAsync($"{GetHeader(f)}{GetCalcMessage(f, role, result)}\n\n{GetSendMessage(server, f, result)}");
 						}
 						catch (Exception)
 						{
@@ -372,9 +372,7 @@ namespace YukiChang
 
         private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
         {
-            return $"{f.Title} の凸集計について\n" +
-				$"集計日時: {DateTime.Now}\n\n" +
-				$"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
+            return $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
 				$"残凸のあるユーザー:\n" +
 				$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
 				$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
@@ -383,13 +381,17 @@ namespace YukiChang
 
         private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)
         {
-            return $"{f.Title} の凸集計\n" +
-                $"集計日時: {DateTime.Now}\n" +
-                $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
+            return $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
                 $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
                 $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
                 $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
         }
+
+		private static string GetHeader(Message f)
+        {
+			return $"{f.Title} の凸集計\n" +
+				$"集計日時: {DateTime.Now}\n\n";
+		}
 
         private static string Token
 		{
