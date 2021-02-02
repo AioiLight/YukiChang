@@ -52,7 +52,7 @@ namespace YukiChang
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
 						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
 
 					// ログから削除
@@ -77,7 +77,7 @@ namespace YukiChang
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
 						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
 
 					// ログ取り
