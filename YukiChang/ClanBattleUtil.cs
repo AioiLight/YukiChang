@@ -46,9 +46,9 @@ namespace YukiChang
             return result;
         }
 
-        internal static string AttackUser(AttackResult result, SocketGuild socketGuild, int target)
+        internal static string AttackUser(AttackResult result, SocketGuild socketGuild, int target, bool la)
         {
-            var l = result.Users.Where(u => u.Attacked == target).ToList();
+            var l = result.Users.Where(u => u.Attacked == target && u.LastAttack == la).ToList();
             var text = "";
             foreach (var item in l)
             {

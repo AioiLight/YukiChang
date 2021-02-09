@@ -46,15 +46,17 @@ namespace YukiChang
 			{
 				var target = Settings.Servers.First(s => s.ID == server.Id);
 				var role = server.GetRole(target.UserRole);
-				if (target.LogChannel.HasValue
-					&& target.Messages.Any(m => m.MessageID == arg3.MessageId)
+				if (target.Messages.Any(m => m.MessageID == arg3.MessageId)
 					&& role.Members.Any(m => m.Id == arg3.UserId)
 					&& arg3.Emote.Name != new Emoji("☠️").Name) // Bot側からリアクションを消した場合と干渉するので例外的にログを流さない。
 				{
-					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
-						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
+					if (target.LogChannel.HasValue)
+                    {
+						var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
+						await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
+							$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
+                    }
 
 					// ログから削除
 					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
@@ -72,19 +74,20 @@ namespace YukiChang
             {
 				var target = Settings.Servers.First(s => s.ID == server.Id);
 				var role = server.GetRole(target.UserRole);
-				if (target.LogChannel.HasValue
-					&& target.Messages.Any(m => m.MessageID == arg3.MessageId)
+				if (target.Messages.Any(m => m.MessageID == arg3.MessageId)
 					&& role.Members.Any(m => m.Id == arg3.UserId))
 				{
-					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
-						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
+					if (target.LogChannel.HasValue)
+                    {
+						var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
+						await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
+							$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
+                    }
 
 					// ログ取り
 					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
-					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					mes.Logs.Add(log);
+					message.Logs.Add(log);
 
 					// ラストアタックのリアクション付与時の処理
 					var lastAttackReact = new Emoji("☠️");
@@ -93,20 +96,17 @@ namespace YukiChang
 						// ラストアタックのリアクションである
 						message.AddLastAttack(arg3.UserId);
                     }
-				}
 
-				// ラストアタックの処理。
-				var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
-				if (reacts.Any(r => r.Name == arg3.Emote.Name))
-                {
-					// 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
-					if (target.Messages.Any(m => m.MessageID == arg3.MessageId) && role.Members.Any(m => m.Id == arg3.UserId))
-                    {
-                        // リアクション削除
-                        await arg3.Message.Value.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);
-                        //await arg3.Message.Value.RemoveAllReactionsAsync();
-                    }
-                }
+					// ラストアタックのリアクションを除去する処理。
+					var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+					if (reacts.Any(r => r.Name == arg3.Emote.Name))
+					{
+						// 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
+						// リアクション削除
+						var msg = await arg1.GetOrDownloadAsync();
+						await msg.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);						
+					}
+				}
 			}
 			return;
 		}
@@ -396,11 +396,14 @@ namespace YukiChang
 
         private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
         {
-            return $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
+            return $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3, false)}\n" +
 				$"残凸のあるユーザー:\n" +
-				$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
-				$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
-				$"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}";
+				$"・残り0凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 2, true)}\n" +
+				$"・残り1凸\n{ClanBattleUtil.AttackUser(result, server, 2, false)}\n" +
+				$"・残り1凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 1, true)}\n" +
+				$"・残り2凸\n{ClanBattleUtil.AttackUser(result, server, 1, false)}\n" +
+				$"・残り2凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 0, true)}\n" +
+				$"・残り3凸\n{ClanBattleUtil.AttackUser(result, server, 0, false)}";
         }
 
         private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)

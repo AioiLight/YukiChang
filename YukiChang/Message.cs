@@ -20,7 +20,7 @@ namespace YukiChang
             if (!LastAttacks.ContainsKey(uid))
             {
                 // 新規追加
-                LastAttacks.Add(uid, 0);
+                LastAttacks.Add(uid, 1);
             }
             else
             {
