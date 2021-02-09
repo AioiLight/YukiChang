@@ -53,7 +53,7 @@ namespace YukiChang
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
 						$"{message.Title} をリアクション {arg3.Emote.Name} を削除しました。");
 
 					// ログから削除
@@ -78,7 +78,7 @@ namespace YukiChang
 				{
 					var ch = server.GetChannel(target.LogChannel.Value) as ISocketMessageChannel;
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					await ch?.SendMessageAsync($"[{DateTime.Now}] {arg3.User.Value.Username} さんが " +
+					await ch?.SendMessageAsync($"[{DateTime.Now}] {DiscordUtil.GetName(arg3.UserId, server)} さんが " +
 						$"{message.Title} にリアクション {arg3.Emote.Name} を付与しました。");
 
 					// ログ取り
@@ -109,20 +109,23 @@ namespace YukiChang
 			var text = arg.Content.Trim();
 			if (text.StartsWith(Prefix))
             {
-				var line = text.Substring(Prefix.Length + 1);
+				var line = text.Substring(Prefix.Length).Trim();
 
 				// コマンドチェック
 				if (line.Length <= 0)
-                {
+				{
 					// なし
 					Util.Error(arg, "コマンドが指定されていません。");
 					return;
-                }
+				}
 
 				// パラメーターで分割
 				var cmd = line.Split(' ').First();
 				var param = line.Split(' ').Skip(1).ToArray();
 				var server = (arg.Channel as SocketGuildChannel).Guild;
+
+                // Typing... 演出
+                _ = arg.Channel.TriggerTypingAsync();
 
 				if (cmd == "init" && DiscordUtil.IsAdmin(arg))
                 {
@@ -202,6 +205,11 @@ namespace YukiChang
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
                 }
+				else if (cmd == "list")
+                {
+					await arg.Channel.SendMessageAsync($"{server.Name} の凸管理一覧\n" +
+						$"{string.Join("\n", srv.Messages.Select(m => m.Title).ToArray())}");
+                }
 				else if (cmd == "calc")
                 {
 					// 集計
@@ -210,26 +218,21 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
                         {
-							if (!srv.Messages.Any(mt => mt.Title == title))
+                            if (!srv.Messages.Any(mt => mt.Title == title))
                             {
-								Util.Error(arg, "そのメッセージは集計対象ではありません。");
-							}
+                                Util.Error(arg, "そのメッセージは集計対象ではありません。");
+                            }
 
-							var f = srv.Messages.First(mt => mt.Title == title);
-							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
-							var role = server.GetRole(srv.UserRole);
+                            var f = srv.Messages.First(mt => mt.Title == title);
+                            var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+                            var role = server.GetRole(srv.UserRole);
 
-							// 集計
-							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
+                            // 集計
+                            var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計\n" +
-								$"集計日時: {DateTime.Now}\n" +
-								$"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
-								$"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
-								$"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
-								$"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}");
-						}
-						catch (Exception)
+                            await arg.Channel.SendMessageAsync(GetHeader(f) + GetCalcMessage(f, role, result));
+                        }
+                        catch (Exception)
                         {
 							Util.Error(arg, "パラメータの値が不正です。");
 						}
@@ -242,6 +245,38 @@ namespace YukiChang
 				else if (cmd == "send")
                 {
 					// 勧告
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+                        {
+                            if (!srv.Messages.Any(mt => mt.Title == title))
+                            {
+                                Util.Error(arg, "そのメッセージは集計対象ではありません。");
+                            }
+
+                            var f = srv.Messages.First(mt => mt.Title == title);
+                            var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+                            var role = server.GetRole(srv.UserRole);
+
+                            // 集計
+                            var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
+
+                            await arg.Channel.SendMessageAsync(GetHeader(f) + GetSendMessage(server, f, result));
+                        }
+                        catch (Exception)
+						{
+							Util.Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Util.Error(arg, "パラメーターが不足しています。");
+					}
+				}
+				else if (cmd == "all")
+                {
+					// 集計＆勧告
 					if (param.Length >= 1)
 					{
 						var title = string.Join(" ", param);
@@ -259,13 +294,7 @@ namespace YukiChang
 							// 集計
 							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
 
-							await arg.Channel.SendMessageAsync($"{f.Title} の凸集計について\n" +
-								$"集計日時: {DateTime.Now}\n\n" +
-								$"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
-								$"残凸のあるユーザー:\n" +
-								$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
-								$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
-								$"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}");
+							await arg.Channel.SendMessageAsync($"{GetHeader(f)}{GetCalcMessage(f, role, result)}\n\n{GetSendMessage(server, f, result)}");
 						}
 						catch (Exception)
 						{
@@ -345,6 +374,11 @@ namespace YukiChang
 						await arg.Channel.SendMessageAsync($"権限がありません。");
 					}
 				}
+				else
+                {
+					// なし
+					Util.Error(arg, "コマンドが存在しません。");
+				}
 
 				// 保存
 				await Util.Save(Settings);
@@ -352,6 +386,29 @@ namespace YukiChang
 
 			return;
         }
+
+        private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
+        {
+            return $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
+				$"残凸のあるユーザー:\n" +
+				$"・残り1凸 (3凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
+				$"・残り2凸 (2凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
+				$"・残り3凸 (1凸+持ち越し)\n{ClanBattleUtil.AttackUser(result, server, 0)}";
+        }
+
+        private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)
+        {
+            return $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
+                $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
+                $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
+                $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
+        }
+
+		private static string GetHeader(Message f)
+        {
+			return $"{f.Title} の凸集計\n" +
+				$"集計日時: {DateTime.Now}\n\n";
+		}
 
         private static string Token
 		{
