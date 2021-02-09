@@ -86,6 +86,13 @@ namespace YukiChang
 					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					mes.Logs.Add(log);
 
+					// ラストアタックのリアクション付与時の処理
+					var lastAttackReact = new Emoji("☠️");
+					if (arg3.Emote.Name == lastAttackReact.Name)
+                    {
+						// ラストアタックのリアクションである
+						message.AddLastAttack(arg3.UserId);
+                    }
 				}
 
 				// ラストアタックの処理。
