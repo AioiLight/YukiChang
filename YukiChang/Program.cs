@@ -407,10 +407,10 @@ namespace YukiChang
             {
 				var y = "!yuki";
 #if BETA
-				return y + "b";
+				return y + "b ";
 #endif
 #if !BETA
-				return y;
+				return y + " ";
 #endif
 			}
         }
