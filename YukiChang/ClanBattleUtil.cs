@@ -46,14 +46,19 @@ namespace YukiChang
             return result;
         }
 
-        internal static string AttackUser(AttackResult result, SocketGuild socketGuild, int target, bool la)
+        internal static string AttackUser(AttackResult result, SocketGuild socketGuild, int target)
         {
-            var l = result.Users.Where(u => u.Attacked == target && u.LastAttack == la).ToList();
+            var l = result.Users.Where(u => u.Attacked == target).ToList();
             var text = "";
             foreach (var item in l)
             {
                 var name = DiscordUtil.GetName(item.UserID, socketGuild);
-                text += $"{name} さん\n";
+                if (item.LastAttack)
+                {
+                    text += $"⚠️ ";
+                }
+                text += $"{name} さん";
+                text += $"\n";
             }
             return text;
         }

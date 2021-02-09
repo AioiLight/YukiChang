@@ -426,17 +426,14 @@ namespace YukiChang
 
         private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
         {
-            return $"完凸したユーザー:\n{ClanBattleUtil.AttackUser(result, server, 3, false)}\n" +
-				$"残凸のあるユーザー:\n" +
-				$"・残り0凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 2, true)}\n" +
-				$"・残り1凸\n{ClanBattleUtil.AttackUser(result, server, 2, false)}\n" +
-				$"・残り1凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 1, true)}\n" +
-				$"・残り2凸\n{ClanBattleUtil.AttackUser(result, server, 1, false)}\n" +
-				$"・残り2凸+持ち越し\n{ClanBattleUtil.AttackUser(result, server, 0, true)}\n" +
-				$"・残り3凸\n{ClanBattleUtil.AttackUser(result, server, 0, false)}";
-        }
+			return $"完凸した方:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
+				$"残凸のある方: (⚠️:持ち越しあり)\n" +
+				$"・2 凸済の方\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
+				$"・1 凸済の方\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
+				$"・未凸の方\n{ClanBattleUtil.AttackUser(result, server, 0)}";
+		}
 
-        private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)
+		private static string GetCalcMessage(Message f, SocketRole role, AttackResult result)
         {
             return $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
                 $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
