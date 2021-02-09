@@ -101,10 +101,10 @@ namespace YukiChang
 					var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
 					if (reacts.Any(r => r.Name == arg3.Emote.Name))
 					{
-						// 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
-						// リアクション削除
-						var msg = await arg1.GetOrDownloadAsync();
-						await msg.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);						
+                        // 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
+                        // リアクション削除
+                        var msg = await arg1.GetOrDownloadAsync();
+                        await msg.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);
 					}
 				}
 			}
@@ -313,6 +313,36 @@ namespace YukiChang
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
 				}
+				else if (cmd == "la")
+                {
+					// ラストアタックの集計
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+						{
+							if (!srv.Messages.Any(mt => mt.Title == title))
+							{
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+							}
+
+							var f = srv.Messages.First(mt => mt.Title == title);
+							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+							var role = server.GetRole(srv.UserRole);
+
+							await arg.Channel.SendMessageAsync($"{GetHeader(f)}" +
+								$"{GetLAMessage(server, role, f)}");
+						}
+						catch (Exception)
+						{
+							Util.Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Util.Error(arg, "パラメーターが不足しています。");
+					}
+				}
 				else if (cmd == "log")
                 {
 					// ログ設定
@@ -412,6 +442,18 @@ namespace YukiChang
                 $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
                 $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
                 $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
+        }
+
+		private static string GetLAMessage(SocketGuild guild, SocketRole role, Message message)
+        {
+			var result = new StringBuilder();
+			// 降順
+			var sorted = message.LastAttacks.OrderBy(m => m.Value).Reverse();
+            foreach (var item in sorted)
+            {
+				result.AppendLine($"{DiscordUtil.GetName(item.Key, guild)} さん: {item.Value } 回");
+            }
+			return result.ToString();
         }
 
 		private static string GetHeader(Message f)
