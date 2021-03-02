@@ -6,19 +6,33 @@ namespace YukiChang
     public class AttackResult
     {
         public readonly List<AttackUser> Users = new List<AttackUser>();
-        public AttackUser Attack(ulong uid)
+        public AttackUser Attack(ulong uid, bool isLastAttack)
         {
             if (Users.Any(u => u.UserID == uid))
             {
                 var u = Users.First(uf => uf.UserID == uid);
-                u.Attack();
+                if (isLastAttack)
+                {
+                    u.Last();
+                }
+                else
+                {
+                    u.Attack();
+                }
                 return u;
             }
             else
             {
                 Users.Add(new AttackUser(uid));
                 var u = Users.Last();
-                u.Attack();
+                if (isLastAttack)
+                {
+                    u.Last();
+                }
+                else
+                {
+                    u.Attack();
+                }
                 return u;
             }
         }
@@ -39,6 +53,21 @@ namespace YukiChang
             if (Remain > 0)
             {
                 Attacked++;
+                if (LastAttack)
+                {
+                    LastAttack = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// ラストアタックする。
+        /// </summary>
+        public void Last()
+        {
+            if (Remain > 0)
+            {
+                LastAttack = true;
             }
         }
 
@@ -57,6 +86,11 @@ namespace YukiChang
         /// 凸数。
         /// </summary>
         public int Attacked { get; private set; } = 0;
+
+        /// <summary>
+        /// ラストアタックをしたか。
+        /// </summary>
+        public bool LastAttack { get; private set; } = false;
 
         /// <summary>
         /// 完凸したか？

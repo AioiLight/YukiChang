@@ -18,6 +18,9 @@ namespace YukiChang
         {
             var result = new AttackResult();
             targetRole.Members.ToList().ForEach(mr => result.Users.Add(new AttackUser(mr.Id)));
+
+            var la = await m.GetReactionUsersAsync(new Emoji("☠️"), 100).FlattenAsync();
+
             var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
             for (var i = 0; i < reacts.Length; i++)
             {
@@ -27,10 +30,19 @@ namespace YukiChang
                 {
                     if (targetRole.Members.Any(e => e.Id == item.Id))
                     {
-                        result.Attack(item.Id);
+                        result.Attack(item.Id, false);
                     }
                 }
             }
+
+            foreach (var item in la)
+            {
+                if (targetRole.Members.Any(e => e.Id == item.Id))
+                {
+                    result.Attack(item.Id, true);
+                }
+            }
+
             return result;
         }
 
@@ -41,7 +53,12 @@ namespace YukiChang
             foreach (var item in l)
             {
                 var name = DiscordUtil.GetName(item.UserID, socketGuild);
-                text += $"{name} さん\n";
+                if (item.LastAttack)
+                {
+                    text += $"⚠️ ";
+                }
+                text += $"{name} さん";
+                text += $"\n";
             }
             return text;
         }
