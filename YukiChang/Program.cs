@@ -155,15 +155,18 @@ namespace YukiChang
 							await arg.Channel.SendMessageAsync($"サーバー {server.Name} の初期設定が完了しました。\n" +
 								$"管理者役職: {server.GetRole(ulong.Parse(param[0])).Name}\n" +
 								$"集計対象役職: {server.GetRole(ulong.Parse(param[1])).Name}");
+							return;
                         }
                         catch (Exception)
                         {
 							Util.Error(arg, "パラメータの値が不正です。");
+							return;
 						}
                     }
 					else
                     {
 						Util.Error(arg, "パラメーターが不足しています。");
+						return;
 					}
                 }
 
