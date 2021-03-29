@@ -228,12 +228,14 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
                         {
-                            if (!srv.Messages.Any(mt => mt.Title == title))
-                            {
-                                Util.Error(arg, "そのメッセージは集計対象ではありません。");
-                            }
+							var f = ClanBattleUtil.GetProperMessage(srv.Messages.ToArray(), title);
 
-                            var f = srv.Messages.First(mt => mt.Title == title);
+							if (f == null)
+                            {
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+								return;
+							}
+
                             var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
                             var role = server.GetRole(srv.UserRole);
 
@@ -260,12 +262,14 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
                         {
-                            if (!srv.Messages.Any(mt => mt.Title == title))
-                            {
-                                Util.Error(arg, "そのメッセージは集計対象ではありません。");
-                            }
+							var f = ClanBattleUtil.GetProperMessage(srv.Messages.ToArray(), title);
 
-                            var f = srv.Messages.First(mt => mt.Title == title);
+							if (f == null)
+							{
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+								return;
+							}
+
                             var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
                             var role = server.GetRole(srv.UserRole);
 
@@ -292,12 +296,14 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
 						{
-							if (!srv.Messages.Any(mt => mt.Title == title))
+							var f = ClanBattleUtil.GetProperMessage(srv.Messages.ToArray(), title);
+
+							if (f == null)
 							{
 								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+								return;
 							}
 
-							var f = srv.Messages.First(mt => mt.Title == title);
 							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
 							var role = server.GetRole(srv.UserRole);
 
@@ -324,12 +330,14 @@ namespace YukiChang
 						var title = string.Join(" ", param);
 						try
 						{
-							if (!srv.Messages.Any(mt => mt.Title == title))
+							var f = ClanBattleUtil.GetProperMessage(srv.Messages.ToArray(), title);
+
+							if (f == null)
 							{
 								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+								return;
 							}
 
-							var f = srv.Messages.First(mt => mt.Title == title);
 							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
 							var role = server.GetRole(srv.UserRole);
 
