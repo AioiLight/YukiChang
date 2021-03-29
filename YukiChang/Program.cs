@@ -199,6 +199,13 @@ namespace YukiChang
 							return;
                         }
 
+						if (ClanBattleUtil.Keywords.Any(str => str == title))
+                        {
+							// キーワード重複確認
+							Util.Error(arg, $"タイトル {title} は YukiChang 内で使用されるキーワードのため使用できません。別のタイトルを指定してください。");
+							return;
+                        }
+
 						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
 							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n" +
 							$"ボスを倒したら、☠️ボタンを押して、持ち越しを消化後数字のボタンを押してください。\n");

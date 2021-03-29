@@ -27,11 +27,22 @@ namespace YukiChang
             {
                 return messages.FirstOrDefault();
             }
+            else if (messages.Any(m => m.Title == title))
+            {
+                // 完全一致
+                return messages.First(m => m.Title == title);
+            }
 
             var result = messages.LastOrDefault(m => m.Title.StartsWith(title));
 
             return result;
         }
+
+        internal static string[] Keywords = new string[]
+        {
+            "last",
+            "first"
+        };
 
         internal static string CalcPercent(int a, int b)
         {
