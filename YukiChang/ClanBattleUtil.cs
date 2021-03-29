@@ -19,6 +19,15 @@ namespace YukiChang
         /// <returns>見つかったMessage。存在しない場合、nullを返す。</returns>
         internal static Message GetProperMessage(Message[] messages, string title)
         {
+            if (title == "last")
+            {
+                return messages.LastOrDefault();
+            }
+            else if (title == "first")
+            {
+                return messages.FirstOrDefault();
+            }
+
             var result = messages.LastOrDefault(m => m.Title.StartsWith(title));
 
             return result;
