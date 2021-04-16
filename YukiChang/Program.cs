@@ -207,8 +207,8 @@ namespace YukiChang
                         }
 
 						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
-							$"本戦に挑戦し、凸が完了したらボタンを押して進捗を記録します。\n" +
-							$"ボスを倒したら、☠️ボタンを押して、持ち越しを消化後数字のボタンを押してください。\n");
+							$"本戦に挑戦し、凸が完了したら 1️⃣ 2️⃣ 3️⃣ のリアクションを押して進捗を記録します。\n" +
+							$"持越しが発生した場合、☠️ ボタンを押して、持越しの使用後に数字のボタンを押してください。\n");
 
 						await m.AddReactionAsync(new Emoji("1️⃣"));
 						await m.AddReactionAsync(new Emoji("2️⃣"));
