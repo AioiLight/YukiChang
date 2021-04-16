@@ -9,6 +9,41 @@ namespace YukiChang
 {
     internal static class ClanBattleUtil
     {
+        /// <summary>
+        /// メッセージのタイトルに近いMessageを取得する。
+        /// もし複数見つかった場合は、最後にbeginされた凸集計が選ばれる。
+        /// 存在しないとnullを返す。
+        /// </summary>
+        /// <param name="messages">Message[]。</param>
+        /// <param name="title">メッセージのタイトル。</param>
+        /// <returns>見つかったMessage。存在しない場合、nullを返す。</returns>
+        internal static Message GetProperMessage(Message[] messages, string title)
+        {
+            if (title == "last")
+            {
+                return messages.LastOrDefault();
+            }
+            else if (title == "first")
+            {
+                return messages.FirstOrDefault();
+            }
+            else if (messages.Any(m => m.Title == title))
+            {
+                // 完全一致
+                return messages.First(m => m.Title == title);
+            }
+
+            var result = messages.LastOrDefault(m => m.Title.StartsWith(title));
+
+            return result;
+        }
+
+        internal static string[] Keywords = new string[]
+        {
+            "last",
+            "first"
+        };
+
         internal static string CalcPercent(int a, int b)
         {
             return $"{a}/{b} ({1.0 * a / b:##.##%})";
