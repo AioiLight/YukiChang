@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -349,7 +350,7 @@ namespace YukiChang
 							var role = server.GetRole(srv.UserRole);
 
 							await arg.Channel.SendMessageAsync($"{GetHeader(f)}" +
-								$"{GetLAMessage(server, role, f)}");
+								$"{GetLAMessage(server, f.LastAttacks)}");
 						}
 						catch (Exception)
 						{
@@ -360,6 +361,20 @@ namespace YukiChang
 					{
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
+				}
+				else if (cmd == "laall")
+                {
+					// 全てのラストアタックの集計
+					var m = srv.Messages;
+
+					var all = m.Select(message => message.LastAttacks).SelectMany(d => d)
+						.ToLookup(k => k.Key, v => v.Value)
+						.ToDictionary(group => group.Key, group => group.Sum());
+					
+					var role = server.GetRole(srv.UserRole);
+
+					await arg.Channel.SendMessageAsync($"{GetHeader(null)}" +
+						$"{GetLAMessage(server, all)}");
 				}
 				else if (cmd == "log")
                 {
@@ -459,11 +474,11 @@ namespace YukiChang
                 $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
         }
 
-		private static string GetLAMessage(SocketGuild guild, SocketRole role, Message message)
+		private static string GetLAMessage(SocketGuild guild, Dictionary<ulong, int> lastAttacks)
         {
 			var result = new StringBuilder();
 			// 降順
-			var sorted = message.LastAttacks.OrderBy(m => m.Value).Reverse();
+			var sorted = lastAttacks.OrderBy(m => m.Value).Reverse();
             foreach (var item in sorted)
             {
 				result.AppendLine($"{DiscordUtil.GetName(item.Key, guild)} さん: {item.Value } 回");
@@ -473,7 +488,7 @@ namespace YukiChang
 
 		private static string GetHeader(Message f)
         {
-			return $"{f.Title} の凸集計\n" +
+			return $"{(f != null ? f.Title : "すべて")} の凸集計\n" +
 				$"集計日時: {DateTime.Now}\n\n";
 		}
 
