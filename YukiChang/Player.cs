@@ -11,9 +11,10 @@ namespace YukiChang
     /// </summary>
     public class Player
     {
-        public Player(ulong uid)
+        public Player()
         {
-            UID = uid;
+            LastAttackCount = 0;
+            DoneLastAttackCount = 0;
         }
 
         /// <summary>
@@ -38,10 +39,6 @@ namespace YukiChang
             }
         }
 
-        /// <summary>
-        /// UID。
-        /// </summary>
-        public ulong UID { get; private set; }
         /// <summary>
         /// 持越しを持った回数。
         /// </summary>
