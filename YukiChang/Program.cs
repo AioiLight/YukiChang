@@ -465,7 +465,7 @@ namespace YukiChang
         private static string GetSendMessage(SocketGuild server, Message f, AttackResult result)
         {
 			return $"完凸した方:\n{ClanBattleUtil.AttackUser(result, server, 3)}\n" +
-				$"残凸のある方: (⚠️:持ち越しあり)\n" +
+				$"残凸のある方: (❤️💙💛 : 持ち越しあり)\n" +
 				$"・2 凸済の方\n{ClanBattleUtil.AttackUser(result, server, 2)}\n" +
 				$"・1 凸済の方\n{ClanBattleUtil.AttackUser(result, server, 1)}\n" +
 				$"・未凸の方\n{ClanBattleUtil.AttackUser(result, server, 0)}";
