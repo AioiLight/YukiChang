@@ -8,7 +8,7 @@ namespace YukiChang
         {
             // Init
             Logs = new List<Log>();
-            LastAttacks = new Dictionary<ulong, int>();
+            LastAttacks = new Dictionary<ulong, Player>();
         }
 
         /// <summary>
@@ -20,15 +20,26 @@ namespace YukiChang
             if (!LastAttacks.ContainsKey(uid))
             {
                 // 新規追加
-                LastAttacks.Add(uid, 1);
+                LastAttacks.Add(uid, new Player());
+                LastAttacks[uid].Kill();
             }
             else
             {
                 // 既存のに加算。
-                if (LastAttacks[uid] < 3)
-                {
-                    LastAttacks[uid]++;
-                }
+                LastAttacks[uid].Kill();
+            }
+        }
+
+        /// <summary>
+        /// ラストアタックを消費したことにする。
+        /// </summary>
+        /// <param name="uid">DiscordのUID。</param>
+        public void ConsumeLastAttack(ulong uid)
+        {
+            if (LastAttacks.ContainsKey(uid))
+            {
+                // ラストアタックを消費
+                LastAttacks[uid].ConsumeLastAttack();
             }
         }
 
@@ -52,6 +63,6 @@ namespace YukiChang
         /// <summary>
         /// ラストアタック集計用。
         /// </summary>
-        public Dictionary<ulong, int> LastAttacks { get; set; }
+        public Dictionary<ulong, Player> LastAttacks { get; set; }
     }
 }
