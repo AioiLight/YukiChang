@@ -132,8 +132,8 @@ namespace YukiChang
 				var param = line.Split(' ').Skip(1).ToArray();
 				var server = (arg.Channel as SocketGuildChannel).Guild;
 
-                // Typing... 演出
-                _ = arg.Channel.TriggerTypingAsync();
+				// Typing... 演出
+				await arg.Channel.TriggerTypingAsync();
 
 				if (cmd == "init" && DiscordUtil.IsAdmin(arg))
                 {
