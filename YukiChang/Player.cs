@@ -42,11 +42,11 @@ namespace YukiChang
         /// <summary>
         /// 持越しを持った回数。
         /// </summary>
-        public uint LastAttackCount { get; private set; }
+        public uint LastAttackCount { get; set; }
         /// <summary>
         /// 持越しを消費した回数。
         /// </summary>
-        public uint DoneLastAttackCount { get; private set; }
+        public uint DoneLastAttackCount { get; set; }
         /// <summary>
         /// 残りの持越し数。
         /// </summary>
