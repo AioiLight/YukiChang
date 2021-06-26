@@ -48,8 +48,7 @@ namespace YukiChang
 				var target = Settings.Servers.First(s => s.ID == server.Id);
 				var role = server.GetRole(target.UserRole);
 				if (target.Messages.Any(m => m.MessageID == arg3.MessageId)
-					&& role.Members.Any(m => m.Id == arg3.UserId)
-					&& arg3.Emote.Name != new Emoji("☠️").Name) // Bot側からリアクションを消した場合と干渉するので例外的にログを流さない。
+					&& role.Members.Any(m => m.Id == arg3.UserId))
 				{
 					var message = target.Messages.First(m => m.MessageID == arg3.MessageId);
 					if (target.LogChannel.HasValue)
@@ -60,9 +59,22 @@ namespace YukiChang
                     }
 
 					// ログから削除
-					var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
-					var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
-					mes.Logs.RemoveAll(e => e.SameReact(log));
+					var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+					if (reacts.Any(r => r.Name == arg3.Emote.Name))
+                    {
+						// 数字だったらログから消す。
+						var log = new Log(arg3.UserId, (ulong)DateTimeOffset.Now.ToUnixTimeSeconds(), arg3.Emote.Name);
+						var mes = target.Messages.First(m => m.MessageID == arg3.MessageId);
+						mes.Logs.RemoveAll(e => e.SameReact(log));
+                    }
+
+					// ラストアタックのリアクション付与時の処理
+					var lastAttackReacts = new Emoji[] { new Emoji("❤️"), new Emoji("💙"), new Emoji("💛") };
+					if (lastAttackReacts.Any(r => r.Name == arg3.Emote.Name))
+					{
+						// ラストアタックのリアクションである
+						message.ConsumeLastAttack(arg3.UserId);
+					}
 				}
 			}
 			return;
@@ -91,22 +103,12 @@ namespace YukiChang
 					message.Logs.Add(log);
 
 					// ラストアタックのリアクション付与時の処理
-					var lastAttackReact = new Emoji("☠️");
-					if (arg3.Emote.Name == lastAttackReact.Name)
+					var lastAttackReacts = new Emoji[] { new Emoji("❤️"), new Emoji("💙"), new Emoji("💛") };
+					if (lastAttackReacts.Any(r => r.Name == arg3.Emote.Name))
                     {
 						// ラストアタックのリアクションである
 						message.AddLastAttack(arg3.UserId);
                     }
-
-					// ラストアタックのリアクションを除去する処理。
-					var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
-					if (reacts.Any(r => r.Name == arg3.Emote.Name))
-					{
-                        // 1,2,3ボタンが押されたとき、ラストアタックの絵文字を削除する。
-                        // リアクション削除
-                        var msg = await arg1.GetOrDownloadAsync();
-                        await msg.RemoveReactionAsync(new Emoji("☠️"), arg3.UserId);
-					}
 				}
 			}
 			return;
