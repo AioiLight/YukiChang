@@ -210,13 +210,16 @@ namespace YukiChang
                         }
 
 						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
-							$"本戦に挑戦し、凸が完了したら 1️⃣ 2️⃣ 3️⃣ のリアクションを押して進捗を記録します。\n" +
-							$"持越しが発生した場合、☠️ ボタンを押して、持越しの使用後に数字のボタンを押してください。\n");
+							$"本戦に挑戦し、凸が完了したら 1️⃣ 2️⃣ 3️⃣ の順でボタンを押して進捗を記録します。\n" +
+							$"持越しが発生した場合、数字のボタンを押し、❤️ 💙 💛 どれかを押して記録します。\n" +
+							$"持越しを消費した場合、既に押された ❤️ 💙 💛 を押し直して記録します。");
 
 						await m.AddReactionAsync(new Emoji("1️⃣"));
 						await m.AddReactionAsync(new Emoji("2️⃣"));
 						await m.AddReactionAsync(new Emoji("3️⃣"));
-						await m.AddReactionAsync(new Emoji("☠️"));
+						await m.AddReactionAsync(new Emoji("❤️"));
+						await m.AddReactionAsync(new Emoji("💙"));
+						await m.AddReactionAsync(new Emoji("💛"));
 
 						srv.Messages.Add(new Message() { MessageID = m.Id, ChannelID = m.Channel.Id, Title = title });
 					}
