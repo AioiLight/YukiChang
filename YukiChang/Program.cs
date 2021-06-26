@@ -355,7 +355,7 @@ namespace YukiChang
 							var role = server.GetRole(srv.UserRole);
 
 							await arg.Channel.SendMessageAsync($"{GetHeader(f)}" +
-								$"{GetLAMessage(server, f.LastAttacks)}");
+								$"{GetLAMessage(server, f.LastAttacks.ToDictionary(l => l.Key, l => (long)l.Value.LastAttackCount))}");
 						}
 						catch (Exception)
 						{
@@ -374,7 +374,7 @@ namespace YukiChang
 
 					var all = m.Select(message => message.LastAttacks).SelectMany(d => d)
 						.ToLookup(k => k.Key, v => v.Value)
-						.ToDictionary(group => group.Key, group => group.Sum());
+						.ToDictionary(group => group.Key, group => group.Sum(u => u.LastAttackCount));
 					
 					var role = server.GetRole(srv.UserRole);
 
@@ -479,17 +479,17 @@ namespace YukiChang
                 $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
         }
 
-		private static string GetLAMessage(SocketGuild guild, Dictionary<ulong, int> lastAttacks)
-        {
+		private static string GetLAMessage(SocketGuild guild, Dictionary<ulong, long> lastAttacks)
+		{
 			var result = new StringBuilder();
 			// 降順
 			var sorted = lastAttacks.OrderBy(m => m.Value).Reverse();
-            foreach (var item in sorted)
-            {
+			foreach (var item in sorted)
+			{
 				result.AppendLine($"{DiscordUtil.GetName(item.Key, guild)} さん: {item.Value } 回");
-            }
+			}
 			return result.ToString();
-        }
+		}
 
 		private static string GetHeader(Message f)
         {
