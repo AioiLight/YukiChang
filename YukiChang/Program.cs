@@ -335,6 +335,44 @@ namespace YukiChang
 						Util.Error(arg, "パラメーターが不足しています。");
 					}
 				}
+				else if (cmd == "over" || cmd == "over!")
+                {
+					// 持越しを持っている人の集計
+					if (param.Length >= 1)
+					{
+						var title = string.Join(" ", param);
+						try
+						{
+							var f = ClanBattleUtil.GetProperMessage(srv.Messages.ToArray(), title);
+
+							if (f == null)
+							{
+								Util.Error(arg, "そのメッセージは集計対象ではありません。");
+								return;
+							}
+
+							// 持越し 集計
+							var m = await server.GetTextChannel(f.ChannelID).GetMessageAsync(f.MessageID);
+							var result = await ClanBattleUtil.CalcAttack(m, server.GetRole(srv.UserRole));
+
+							// 持越しをひとつでも持っている人の抽出
+							var hasOver = result.Users.Where(u => u.RemainLastAttackCount > 0);
+							var sorted = hasOver.OrderBy(u => u.RemainLastAttackCount).Reverse().ToArray();
+
+							await arg.Channel.SendMessageAsync($"{GetHeader(f)}" +
+								$"持越しを持っている方:\n" +
+								$"{GetOverMessage(cmd == "over!", server, sorted.ToDictionary(l => l.UserID, l => l.RemainLastAttack))}");
+						}
+						catch (Exception)
+						{
+							Util.Error(arg, "パラメータの値が不正です。");
+						}
+					}
+					else
+					{
+						Util.Error(arg, "パラメーターが不足しています。");
+					}
+				}
 				else if (cmd == "la")
                 {
 					// ラストアタックの集計
@@ -490,6 +528,29 @@ namespace YukiChang
 			}
 			return result.ToString();
 		}
+
+		private static string GetOverMessage(bool mention, SocketGuild guild, Dictionary<ulong, string[]> overs)
+        {
+			var result = new StringBuilder();
+            foreach (var item in overs)
+            {
+				var name = mention ? DiscordUtil.GetMention(item.Key, guild) : DiscordUtil.GetName(item.Key, guild);
+				var reacts = "";
+				for (int i = 0; i < 3; i++)
+				{
+					if (string.IsNullOrWhiteSpace(item.Value[i]))
+					{
+						reacts += "　";
+					}
+					else
+					{
+						reacts += item.Value[i];
+					}
+				}
+				result.AppendLine($"{reacts} {name} さん");
+			}
+			return result.ToString();
+        }
 
 		private static string GetHeader(Message f)
         {

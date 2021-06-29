@@ -37,5 +37,17 @@ namespace YukiChang
             var user = socketGuild.GetUser(uid);
             return user.Nickname ?? user.Username;
         }
+
+        /// <summary>
+        /// UIDからメンションを取得する。
+        /// </summary>
+        /// <param name="uid">UID。</param>
+        /// <param name="socketGuild">サーバ。</param>
+        /// <returns>メンション。</returns>
+        internal static string GetMention(ulong uid, SocketGuild socketGuild)
+        {
+            var user = socketGuild.GetUser(uid);
+            return user.Mention;
+        }
     }
 }

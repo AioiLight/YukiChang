@@ -100,6 +100,17 @@ namespace YukiChang
         }
 
         /// <summary>
+        /// ラストアタックの数。
+        /// </summary>
+        public int RemainLastAttackCount
+        {
+            get
+            {
+                return RemainLastAttack.Where(x => !string.IsNullOrEmpty(x)).Count();
+            }
+        }
+
+        /// <summary>
         /// ユーザーID。
         /// </summary>
         public ulong UserID { get; private set; }
