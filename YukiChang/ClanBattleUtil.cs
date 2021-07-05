@@ -52,11 +52,10 @@ namespace YukiChang
         internal static async Task<AttackResult> CalcAttack(IMessage m, SocketRole targetRole)
         {
             var result = new AttackResult();
-            targetRole.Members.ToList().ForEach(mr => result.Users.Add(new AttackUser(mr.Id)));
-
-            var la = await m.GetReactionUsersAsync(new Emoji("☠️"), 100).FlattenAsync();
+            targetRole.Members.ToList().ForEach(mr => result.Users.Add(new AttackUser(mr.Id)));            
 
             var reacts = new Emoji[] { new Emoji("1️⃣"), new Emoji("2️⃣"), new Emoji("3️⃣") };
+            var lastReacts = new Emoji[] { new Emoji("❤️"), new Emoji("💙"), new Emoji("💛") };
             for (var i = 0; i < reacts.Length; i++)
             {
                 var reactions = await m.GetReactionUsersAsync(reacts[i], 100).FlattenAsync();
@@ -65,16 +64,21 @@ namespace YukiChang
                 {
                     if (targetRole.Members.Any(e => e.Id == item.Id))
                     {
-                        result.Attack(item.Id, false);
+                        result.Attack(item.Id);
                     }
                 }
             }
 
-            foreach (var item in la)
+            for (int i = 0; i < lastReacts.Length; i++)
             {
-                if (targetRole.Members.Any(e => e.Id == item.Id))
+                var reactions = await m.GetReactionUsersAsync(lastReacts[i], 100).FlattenAsync();
+
+                foreach (var item in reactions)
                 {
-                    result.Attack(item.Id, true);
+                    if (targetRole.Members.Any(e => e.Id == item.Id))
+                    {
+                        result.SetLastAttack(item.Id, i, lastReacts[i].ToString());
+                    }
                 }
             }
 
@@ -88,11 +92,19 @@ namespace YukiChang
             foreach (var item in l)
             {
                 var name = DiscordUtil.GetName(item.UserID, socketGuild);
-                if (item.LastAttack)
+                var reacts = "";
+                for (int i = 0; i < 3; i++)
                 {
-                    text += $"⚠️ ";
+                    if (string.IsNullOrWhiteSpace(item.RemainLastAttack[i]))
+                    {
+                        reacts += "　";
+                    }
+                    else
+                    {
+                        reacts += item.RemainLastAttack[i];
+                    }
                 }
-                text += $"{name} さん";
+                text += $"{reacts} {name} さん";
                 text += $"\n";
             }
             return text;

@@ -6,33 +6,36 @@ namespace YukiChang
     public class AttackResult
     {
         public readonly List<AttackUser> Users = new List<AttackUser>();
-        public AttackUser Attack(ulong uid, bool isLastAttack)
+        public AttackUser Attack(ulong uid)
         {
             if (Users.Any(u => u.UserID == uid))
             {
                 var u = Users.First(uf => uf.UserID == uid);
-                if (isLastAttack)
-                {
-                    u.Last();
-                }
-                else
-                {
-                    u.Attack();
-                }
+                u.Attack();
                 return u;
             }
             else
             {
                 Users.Add(new AttackUser(uid));
                 var u = Users.Last();
-                if (isLastAttack)
-                {
-                    u.Last();
-                }
-                else
-                {
-                    u.Attack();
-                }
+                u.Attack();
+                return u;
+            }
+        }
+
+        public AttackUser SetLastAttack(ulong uid, int index, string emoji)
+        {
+            if (Users.Any(u => u.UserID == uid))
+            {
+                var u = Users.First(uf => uf.UserID == uid);
+                u.AddLastAttack(index, emoji);
+                return u;
+            }
+            else
+            {
+                Users.Add(new AttackUser(uid));
+                var u = Users.Last();
+                u.AddLastAttack(index, emoji);
                 return u;
             }
         }
@@ -53,22 +56,15 @@ namespace YukiChang
             if (Remain > 0)
             {
                 Attacked++;
-                if (LastAttack)
-                {
-                    LastAttack = false;
-                }
             }
         }
 
         /// <summary>
         /// ラストアタックする。
         /// </summary>
-        public void Last()
+        public void AddLastAttack(int index, string emoji)
         {
-            if (Remain > 0)
-            {
-                LastAttack = true;
-            }
+            RemainLastAttack[index] = emoji;
         }
 
         /// <summary>
@@ -88,9 +84,9 @@ namespace YukiChang
         public int Attacked { get; private set; } = 0;
 
         /// <summary>
-        /// ラストアタックをしたか。
+        /// 現在の持越し保持数。
         /// </summary>
-        public bool LastAttack { get; private set; } = false;
+        public string[] RemainLastAttack { get; private set; } = new string[3];
 
         /// <summary>
         /// 完凸したか？
@@ -100,6 +96,17 @@ namespace YukiChang
             get
             {
                 return Remain == 0;
+            }
+        }
+
+        /// <summary>
+        /// ラストアタックの数。
+        /// </summary>
+        public int RemainLastAttackCount
+        {
+            get
+            {
+                return RemainLastAttack.Where(x => !string.IsNullOrEmpty(x)).Count();
             }
         }
 
