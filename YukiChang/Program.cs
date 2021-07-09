@@ -211,7 +211,7 @@ namespace YukiChang
 
 						var m = await arg.Channel.SendMessageAsync($"凸集計: {title}\n" +
 							$"本戦に挑戦し、凸が完了したら 1️⃣ 2️⃣ 3️⃣ の順でボタンを押して進捗を記録します。\n" +
-							$"持越しが発生した場合、数字のボタンを押し、❤️ 💙 💛 どれかを押して記録します。\n" +
+							$"持越しが発生した場合、❤️ 💙 💛 のどれかを押して記録します。\n" +
 							$"持越しを消費した場合、既に押された ❤️ 💙 💛 を押し直して消去します。");
 
 						await m.AddReactionAsync(new Emoji("1️⃣"));
