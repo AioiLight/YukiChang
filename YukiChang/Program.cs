@@ -515,7 +515,7 @@ namespace YukiChang
             return $"合計凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Attacked), role.Members.Count() * 3)}\n" +
                 $"残凸数: {ClanBattleUtil.CalcPercent(result.Users.Sum(u => u.Remain), role.Members.Count() * 3)}\n" +
                 $"完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.IsCompleted), role.Members.Count())}\n" +
-                $"未完凸済者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => !u.IsCompleted), role.Members.Count())}";
+                $"未凸者: {ClanBattleUtil.CalcPercent(result.Users.Count(u => u.Attacked == 0), role.Members.Count())}";
         }
 
 		private static string GetLAMessage(SocketGuild guild, Dictionary<ulong, long> lastAttacks)
