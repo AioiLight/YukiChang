@@ -194,7 +194,7 @@ namespace YukiChang
 					// 集計の開始。
 					if (param.Length >= 1)
                     {
-						var title = string.Join(" ", param);
+						var title = string.Join(" ", param).Trim();
 						if (srv.Messages.Any(mt => mt.Title == title))
                         {
 							// 重複チェック
